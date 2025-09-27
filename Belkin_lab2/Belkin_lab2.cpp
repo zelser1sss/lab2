@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include <fstream>
+#include <sstream>
 using namespace std;
 
 class Pipe 
@@ -167,6 +168,135 @@ void ViewAllObjects(const map<int, Pipe>& pipe_list, const map<int, CS>& cs_list
     };
 };
 
+void EditPipe(vector<int>& IDS, map<int, Pipe>& pipe_list)
+{
+    if (IDS.empty()) {
+        cout << "\nТРУБ НЕТ\n\n";
+        return;
+    }
+
+    string status;
+    cout << "\nТруба/ы в ремонте?(Yes/No): ";
+    while (true) {
+        cin >> status;
+        if (status == "Yes") {
+            for (size_t i = 0; i < IDS.size(); i++) {
+                pipe_list[IDS[i]].repair = true;
+            };
+            cout << "Статус 'в ремонте' сменен на 'Да'\n\n";
+            break;
+        }
+        else if (status == "No") {
+            for (size_t i = 0; i < IDS.size(); i++) {
+                pipe_list[IDS[i]].repair = false;
+            };
+            cout << "Статус 'в ремонте' сменен на 'Нет'\n\n";
+            break;
+        }
+        else {
+            cout << "Ошибка! Введите 'Yes' или 'No': ";
+        };
+    };
+};
+
+void PaketEditPipe(vector<int>& IDS, map<int, Pipe>& pipe_list)
+{
+    int i;
+    string line;
+    vector<int> ID;
+    while (1) {
+        cout << "--------------------------------------\n";
+        cout << "Выберите опцию:\n1. Редактировать все найденные\n2. Выбрать несколько или одну труб(у) в списке найденных\n3. Вернутся к поиску\n";
+        cout << "--------------------------------------\n\n";
+        int option;
+        option = ProverkaInt();
+
+        switch (option)
+        {
+        case 1:
+            EditPipe(IDS, pipe_list);
+            break;
+        case 2: 
+        {
+            cout << "Введите ID труб/ы в списке найденных: ";
+            getline(cin, line);
+            stringstream ss(line);
+            string word;
+
+            while (ss >> word) {
+                bool param = false;
+                try {
+                    stoi(word);
+                }
+                catch (const std::invalid_argument& e) {
+                    cout << "Ошибка: '" << word << "' не является числом!" << endl;
+                };
+
+                for (size_t i = 0; i < IDS.size(); i++)
+                {
+                    if (IDS[i] == stoi(word)) {
+                        ID.push_back(stoi(word));
+                        param = true;
+                    };
+                };
+                if (param == false) {
+                    cout << "ID:" << word << " нету среди найденных" << endl;
+                };
+            };
+
+            EditPipe(ID, pipe_list);
+            break;
+        };
+        case 3:
+            return;
+        default:
+            cout << "Неизвестная опция. Попробуйте еще раз\n\n";
+        };
+    };
+};
+
+void SearchPipe(map<int, Pipe>& pipe_list)
+{
+    vector<int> IDS;
+    string name1;
+    int i = 0;
+    while (1) {
+        while (1) {
+            cout << "--------------------------------------\n";
+            cout << "Выберите опцию:\n1. Найти трубу по названию\n2. Найти трубу по признаку 'в ремонте'\n3. Вернутся\n";
+            cout << "--------------------------------------\n\n";
+            int option;
+            option = ProverkaInt();
+
+            switch (option)
+            {
+            case 1:
+                IDS.clear();
+                cout << "Введите название трубы: ";
+                getline(cin, name1);
+                cout << "\nНайденные трубы:\n";
+                for (auto& element : pipe_list) {
+                    if (name1 == element.second.name) {
+                        IDS.push_back(element.first);
+                        cout << i + 1 << ". " <<  element.second.name << " " << "[ID:" << element.first << "]" << endl;
+                        i++;
+                    };
+                };
+                cout << endl;
+                PaketEditPipe(IDS, pipe_list);
+                break;
+            case 2:
+                break;
+            case 3:
+                return;
+            default:
+                cout << "Неизвестная опция. Попробуйте еще раз\n\n";
+                break;
+            };
+        };
+    };
+};
+
 void Save(const map<int, Pipe>& pipe_list, const map<int, CS>& cs_list)
 {
     string file;
@@ -312,6 +442,7 @@ void Menu(map<int, Pipe>& pipe_list, map<int, CS>& cs_list)
             ViewAllObjects(pipe_list, cs_list);
             break;
         case 4:
+            SearchPipe(pipe_list);
             break;
         case 5:
             break;
