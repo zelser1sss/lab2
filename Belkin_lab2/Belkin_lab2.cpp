@@ -32,26 +32,55 @@ public:
 
 int ProverkaInt()
 {
-    int value;
-    while (!(cin >> value) || value <= 0) {
-        cout << "Ошибка! Введите ПОЛОЖИТЕЛЬНОЕ ЦЕЛОЕ ЧИСЛО: ";
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    string line;
+    while (true) {
+        getline(cin, line);
+        try
+        {
+            for (char w : line) {
+                string temp(1, w);
+                stoi(temp);
+            };
+
+            int value = stoi(line);
+            if (value <= 0) {
+                throw invalid_argument("Number must be positive");
+            };
+            return value;
+        }
+        catch (const std::invalid_argument& e) {
+            cout << "Ошибка!\nВведите ПОЛОЖИТЕЛЬНОЕ ЦЕЛОЕ ЧИСЛО: ";
+        };
     };
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    return value;
 };
 
 float ProverkaFloat()
 {
-    float value;
-    while (!(cin >> value) || value <= 0) {
-        cout << "Ошибка! Введите ПОЛОЖИТЕЛЬНОЕ ЧИСЛО: ";
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    string line;
+    while (true) {
+        getline(cin, line);
+        try
+        {
+            int k = 0;
+            for (char w : line) {
+                if (w == ',' && k < 1) {
+                    k++;
+                    continue;
+                };
+                string temp(1, w);
+                stoi(temp);
+            };
+
+            float value = stof(line);
+            if (value <= 0) {
+                throw invalid_argument("Number must be positive");
+            };
+            return value;
+        }
+        catch (const std::invalid_argument& e) {
+            cout << "Ошибка!\nВведите ПОЛОЖИТЕЛЬНОЕ ЧИСЛО: ";
+        };
     };
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    return value;
 };
 
 template<typename T>
@@ -232,9 +261,9 @@ void PaketEditPipe(vector<int>& IDS, map<int, Pipe>& pipe_list)
                     cout << "Ошибка: '" << word << "' не является числом!" << endl;
                 };
 
-                for (size_t i = 0; i < IDS.size(); i++)
+                for (int i : IDS)
                 {
-                    if (IDS[i] == stoi(word)) {
+                    if (i == stoi(word)) {
                         ID.push_back(stoi(word));
                         param = true;
                     };
@@ -263,7 +292,7 @@ void SearchPipe(map<int, Pipe>& pipe_list)
     while (1) {
         while (1) {
             cout << "--------------------------------------\n";
-            cout << "Выберите опцию:\n1. Найти трубу по названию\n2. Найти трубу по признаку 'в ремонте'\n3. Вернутся\n";
+            cout << "Выберите опцию:\n1. Найти трубу по названию\n2. Найти трубу по признаку 'в ремонте'\n3. Вернутся в главное меню\n";
             cout << "--------------------------------------\n\n";
             int option;
             option = ProverkaInt();
