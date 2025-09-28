@@ -166,10 +166,6 @@ void Delete(map<int, T>& container, vector<int>& found_id, vector<int> select_id
 void DisplayFoundPipes(const map<int, Pipe>& pipe_list, const vector<int>& found_id)
 {
 
-    if (found_id.empty()) {
-        cout << "\nТрубы не найдены!\n\n";
-    };
-
     cout << "\nНайденные трубы:\n--------------------------------------\n";
     for (int i : found_id) {
         cout << pipe_list.find(i)->second.name << " [ID:" << i << "] Статус в ремонте: ";
@@ -216,14 +212,14 @@ void EditPipe(map<int, Pipe>& pipe_list, vector<int>& found_id)
     cout << "\nТруба/ы в ремонте?(Yes/No): ";
     while (true) {
         getline(cin, status);
-        if (status == "Yes") {
+        if (status == "Yes" || status == "y" || status == "yes") {
             for (int i : found_id) {
                 pipe_list[i].repair = true;
             };
             cout << "\nСтатус \"в ремонте\" сменен на \"Да\"\n";
             break;
         }
-        else if (status == "No") {
+        else if (status == "No" || status == "n" || status == "no") {
             for (int i : found_id) {
                 pipe_list[i].repair = false;
             };
@@ -263,8 +259,8 @@ void PaсketEditPipe(map<int, Pipe>& pipe_list, vector<int>& found_id)
                 break;
             };
             Delete(pipe_list, found_id, found_id);
-            cout << "\nТруба/ы удалены!\n";
-            break;
+            cout << "\nТруба/ы удалены!\n\n";
+            return;
         case 4:
         {
             cout << "\nВведите ID труб(-ы) через пробел: ";
@@ -279,6 +275,7 @@ void PaсketEditPipe(map<int, Pipe>& pipe_list, vector<int>& found_id)
             break;
         };
         case 5:
+            cout << endl;
             return;
         default:
             cout << "Неизвестная опция. Попробуйте еще раз\n\n";
@@ -317,6 +314,10 @@ void PipeMenu(map<int, Pipe>& pipe_list)
                     found_id.push_back(element.first);
                 };
             };
+            if (found_id.empty()) {
+                cout << "\nТрубы не найдены!\n\n";
+                break;
+            };
             PaсketEditPipe(pipe_list, found_id);
             break;
         };
@@ -338,6 +339,10 @@ void PipeMenu(map<int, Pipe>& pipe_list)
                     found_id.push_back(element.first);
                 };
             };
+            if (found_id.empty()) {
+                cout << "\nТрубы не найдены!\n\n";
+                break;
+            };
             PaсketEditPipe(pipe_list, found_id);
             break;
         };
@@ -353,12 +358,6 @@ void PipeMenu(map<int, Pipe>& pipe_list)
 
 void DisplayFoundCS(const map<int, CS>& cs_list, const vector<int>& found_id)
 {
-
-    if (found_id.empty()) {
-        cout << "\nКС не найдены!\n\n";
-        return;
-    };
-
     cout << "\nНайденные КС:\n--------------------------------------\n";
     for (int i : found_id) {
         cout << cs_list.find(i)->second.name << " [ID:" << i << "] Процент незайдествованных цехов в работе: " << cs_list.find(i)->second.getUnusedPercent() << "% (" << cs_list.find(i)->second.k_cex_in_work << "/" << cs_list.find(i)->second.k_cex << ")" << endl;
@@ -400,8 +399,8 @@ void EditCS(map<int, CS>& cs_list, vector<int> found_id)
     while (1)
     {
         DisplayFoundCS(cs_list, found_id);
-        cout << "\n--------------------------------------\n";
-        cout << "\nВыберите опцию:\n1. Запустить цеха\n2. Остановить цеха\n3. Вернутся обратно\n";
+        cout << "--------------------------------------\n";
+        cout << "Выберите опцию:\n1. Запустить цеха\n2. Остановить цеха\n3. Вернутся обратно\n";
         cout << "--------------------------------------\n\n";
         int option = ProverkaInt();
 
@@ -409,7 +408,7 @@ void EditCS(map<int, CS>& cs_list, vector<int> found_id)
         {
         case 1:
         {
-            cout << "Введите сколько цехов запустить: ";
+            cout << "\nВведите сколько цехов запустить: ";
             int k = ProverkaInt();
             for (auto& element : found_id) {
                 if ((cs_list[element].k_cex_in_work + k) <= cs_list[element].k_cex) {
@@ -424,7 +423,7 @@ void EditCS(map<int, CS>& cs_list, vector<int> found_id)
         };
         case 2:
         {
-            cout << "Введите сколько цехов остановить: ";
+            cout << "\nВведите сколько цехов остановить: ";
             int k = ProverkaInt();
             for (auto& element : found_id) {
                 if ((cs_list[element].k_cex_in_work - k) >= 0) {
@@ -470,8 +469,8 @@ void PacketEditCS(map<int, CS>& cs_list, vector<int>& found_id)
                 break;
             };
             Delete(cs_list, found_id, found_id);
-            cout << "\nКС удалены!\n";
-            break;
+            cout << "\nКС удалены!\n\n";
+            return;
         case 4:
         {
             cout << "\nВведите ID КС через пробел: ";
@@ -486,6 +485,7 @@ void PacketEditCS(map<int, CS>& cs_list, vector<int>& found_id)
             break;
         };
         case 5:
+            cout << endl;
             return;
         default:
             cout << "Неизвестная опция. Попробуйте еще раз\n\n";
@@ -526,6 +526,10 @@ void CSMenu(map<int, CS>& cs_list)
                     found_id.push_back(element.first);
                 };
             };
+            if (found_id.empty()) {
+                cout << "\nКС не найдены!\n\n";
+                break;
+            };
             PacketEditCS(cs_list, found_id);
             break;
         };
@@ -545,6 +549,10 @@ void CSMenu(map<int, CS>& cs_list)
                 if (element.second.getUnusedPercent() == percent) {
                     found_id.push_back(element.first);
                 };
+            };
+            if (found_id.empty()) {
+                cout << "\nКС не найдены!\n\n";
+                break;
             };
             PacketEditCS(cs_list, found_id);
             break;
@@ -605,7 +613,7 @@ void ViewAllObjects(const map<int, Pipe>& pipe_list, const map<int, CS>& cs_list
 void Save(const map<int, Pipe>& pipe_list, const map<int, CS>& cs_list)
 {
     string file;
-    cout << "Введите название файла: ";
+    cout << "\nВведите название файла: ";
     getline(cin, file);
 
     ofstream save;
@@ -636,7 +644,7 @@ void Save(const map<int, Pipe>& pipe_list, const map<int, CS>& cs_list)
         };
     }
     else {
-        cout << "Недопустимое имя файла!\n\n";
+        cout << "\nНедопустимое имя файла!\n\n";
         return;
     };
 };
@@ -644,7 +652,7 @@ void Save(const map<int, Pipe>& pipe_list, const map<int, CS>& cs_list)
 void Upload(map<int, Pipe>& pipe_list, map<int, CS>& cs_list)
 {
     string file;
-    cout << "Введите имя файла: ";
+    cout << "\nВведите имя файла: ";
     getline(cin, file);
 
     string line;
@@ -652,7 +660,7 @@ void Upload(map<int, Pipe>& pipe_list, map<int, CS>& cs_list)
     ifstream upload(file);
 
     if (!(upload.is_open())) {
-        cout << "\nФайл '" << file << "' не найден\n";
+        cout << "\nФайл '" << file << "' не найден\n\n";
         return;
     };
 
@@ -675,7 +683,7 @@ void Upload(map<int, Pipe>& pipe_list, map<int, CS>& cs_list)
         };
 
         if ("КС НЕТ" == line) {
-            cout << "КС НЕТ\n\n";
+            cout << "КС НЕТ\n";
             continue;
         }
         else if ("КС" == line) {
@@ -722,6 +730,7 @@ void Upload(map<int, Pipe>& pipe_list, map<int, CS>& cs_list)
             cs_list.emplace(ID, newCS);
         };
     };
+    cout << endl;
     upload.close();
 };
 
@@ -741,6 +750,7 @@ void Menu(map<int, Pipe>& pipe_list, map<int, CS>& cs_list)
             PipeMenu(pipe_list);
             break;
         case 2:
+            cout << endl;
             CSMenu(cs_list);
             break;
         case 3:
