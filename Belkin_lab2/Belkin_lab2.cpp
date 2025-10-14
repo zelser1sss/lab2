@@ -133,7 +133,7 @@ void DisplayFound(const map<int, T>& container, const vector<int>& found_id, str
     if constexpr (is_same_v<T, Pipe>) {
         for (int i : found_id) {
             const Pipe& pipe = container.find(i)->second;
-            cout << pipe.getName() << " [ID:" << i << "] Статус в ремонте: ";
+            cout << pipe.getName() << " [ID:" << pipe.getId() << "] Статус в ремонте: ";
             if (pipe.getRepair() == true) {
                 cout << "ДА" << endl;
             }
@@ -145,7 +145,7 @@ void DisplayFound(const map<int, T>& container, const vector<int>& found_id, str
     else if constexpr (is_same_v<T, CS>) {
         for (int i : found_id) {
             const CS& cs = container.find(i)->second;
-            cout << cs.getName() << " [ID:" << i << "] Процент незадействованных цехов в работе: " << cs.getUnusedPercent() << "% (" << cs.getKCexInWork() << "/" << cs.getKCex() << ")" << endl;
+            cout << cs.getName() << " [ID:" << cs.getId() << "] Процент незадействованных цехов в работе: " << cs.getUnusedPercent() << "% (" << cs.getKCexInWork() << "/" << cs.getKCex() << ")" << endl;
         };
     };
     cout << "--------------------------------------\n\n";
@@ -194,8 +194,8 @@ void AddPipe(map<int, Pipe>& pipe_list)
     cout << "Труба на ремонте?(Yes/No): ";
     bool repair = CheckYesNo();
 
-    Pipe newPipe(name, length, diameter, repair);
     int ID = GetNextID(pipe_list);
+    Pipe newPipe(ID, name, length, diameter, repair);
     pipe_list[ID] = newPipe;
     cout << "\nНовая труба добавлена\n\n";
 
@@ -253,8 +253,8 @@ void AddCS(map<int, CS>& cs_list)
     cout << "Введите тип КС: ";
     getline(cin, type);
 
-    CS newCS(name, k_cex, k_cex_in_work, type);
     int ID = GetNextID(cs_list);
+    CS newCS(ID, name, k_cex, k_cex_in_work, type);
     cs_list[ID] = newCS;
     cout << "\nНовая КС добавлена\n\n";
 };
@@ -535,7 +535,7 @@ void Save(const map<int, Pipe>& pipe_list, const map<int, CS>& cs_list)
         if (!(pipe_list.empty())) {
             save << "ТРУБЫ\n";
             for (const auto& element : pipe_list) {
-                save << element.first << "|" << element.second.getName() << "|" << element.second.getLength() << "|" << element.second.getDiameter() << "|" << element.second.getRepair() << "|" << endl;
+                save << element.second.getId() << "|" << element.second.getName() << "|" << element.second.getLength() << "|" << element.second.getDiameter() << "|" << element.second.getRepair() << "|" << endl;
             };
             cout << "\nСписок труб сохранен!\n";
         }
@@ -547,7 +547,7 @@ void Save(const map<int, Pipe>& pipe_list, const map<int, CS>& cs_list)
         if (!(cs_list.empty())) {
             save << "КС\n";
             for (const auto& element : cs_list) {
-                save << element.first << "|" << element.second.getName() << "|" << element.second.getKCex() << "|" << element.second.getKCexInWork() << "|" << element.second.getType() << "|" << endl;
+                save << element.second.getId() << "|" << element.second.getName() << "|" << element.second.getKCex() << "|" << element.second.getKCexInWork() << "|" << element.second.getType() << "|" << endl;
             };
             cout << "Список КС сохранен!\n\n";
         }
@@ -618,13 +618,13 @@ void Upload(map<int, Pipe>& pipe_list, map<int, CS>& cs_list)
 
         if (state == "Trubs") {
             int ID = stoi(sub[0]);
-            Pipe newPipe(sub[1], stof(sub[2]), stoi(sub[3]), stoi(sub[4]));
+            Pipe newPipe(ID, sub[1], stof(sub[2]), stoi(sub[3]), stoi(sub[4]));
             pipe_list.emplace(ID, newPipe);
         };
 
         if (state == "CS") {
             int ID = stoi(sub[0]);
-            CS newCS(sub[1], stoi(sub[2]), stoi(sub[3]), sub[4]);
+            CS newCS(ID, sub[1], stoi(sub[2]), stoi(sub[3]), sub[4]);
             cs_list.emplace(ID, newCS);
         };
     };

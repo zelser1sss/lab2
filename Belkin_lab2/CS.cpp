@@ -1,7 +1,7 @@
 #include "CS.h"
 
-CS::CS(const std::string& name, int k_cex, int k_cex_in_work, const std::string& type)
-    : name(name), k_cex(k_cex), k_cex_in_work(k_cex_in_work), type(type) {
+CS::CS(int id, const std::string& name, int k_cex, int k_cex_in_work, const std::string& type)
+    : id(id), name(name), k_cex(k_cex), k_cex_in_work(k_cex_in_work), type(type) {
 };
 
 float CS::getUnusedPercent() const {

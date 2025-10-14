@@ -5,6 +5,7 @@ class CS
 {
 private:
 
+	int id;
 	std::string name;
 	int k_cex;
 	int k_cex_in_work;
@@ -13,13 +14,15 @@ private:
 public:
 
 	CS() = default;
-	CS(const std::string& name, int k_cex, int k_cex_in_work, const std::string& type);
+	CS(int id, const std::string& name, int k_cex, int k_cex_in_work, const std::string& type);
 
+	int getId() const { return id; }
 	std::string getName() const { return name; }
 	int getKCex() const { return k_cex; }
 	int getKCexInWork() const { return k_cex_in_work; }
 	std::string getType() const { return type; }
 
+	void setId(int newId) { id = newId; }
 	void setName(const std::string& newName) { name = newName; }
 	void setKCex(int newKCex) { k_cex = newKCex; }
 	void setKCexInWork(int newKCexInWork) { k_cex_in_work = newKCexInWork; }
