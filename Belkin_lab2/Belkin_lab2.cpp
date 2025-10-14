@@ -6,62 +6,12 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include "Pipe.h"
+#include "CS.h"
 using namespace std;
 
-class Pipe
-{
-public:
-
-    string name;
-    float length;
-    int diameter;
-    bool repair;
-
-};
-
-class CS
-{
-public:
-
-    string name;
-    int k_cex;
-    int k_cex_in_work;
-    string type;
-
-    float getUnusedPercent() const {
-        if (k_cex == 0) return 0.0f;
-        return (static_cast<float>(k_cex - k_cex_in_work) / k_cex) * 100;
-    }
-};
-
-void EditPipe(map<int, Pipe>& pipe_list, vector<int>& found_id);
-void EditCS(map<int, CS>& cs_list, vector<int>& found_id);
-
-int ProverkaInt()
-{
-    string line;
-    while (true) {
-        getline(cin, line);
-        try
-        {
-            for (char w : line) {
-                string temp(1, w);
-                stoi(temp);
-            };
-
-            int value = stoi(line);
-            if (value <= 0) {
-                throw invalid_argument("Number must be positive");
-            };
-            return value;
-        }
-        catch (const std::invalid_argument& e) {
-            cout << "Ошибка!\nВведите ПОЛОЖИТЕЛЬНОЕ ЦЕЛОЕ ЧИСЛО: ";
-        };
-    };
-};
-
-float ProverkaFloat()
+template <typename T>
+T ProverkaNumber()
 {
     string line;
     while (true) {
@@ -70,22 +20,31 @@ float ProverkaFloat()
         {
             int k = 0;
             for (char w : line) {
-                if (w == ',' && k < 1) {
-                    k++;
-                    continue;
+                if constexpr (is_floating_point_v<T>) {
+                    if (w == ',') {
+                        k++;
+                        if (k > 1) throw invalid_argument("Multiple decimals");
+                        continue;
+                    };
                 };
-                string temp(1, w);
-                stoi(temp);
+                if (!isdigit(w)) {
+                    throw invalid_argument("Invalid character");
+                };
             };
-
-            float value = stof(line);
+            T value;
+            if constexpr (is_integral_v<T>) {
+                value = stoi(line);
+            }
+            else {
+                value = stof(line);
+            };
             if (value <= 0) {
                 throw invalid_argument("Number must be positive");
             };
             return value;
         }
         catch (const std::invalid_argument& e) {
-            cout << "Ошибка!\nВведите ПОЛОЖИТЕЛЬНОЕ ЧИСЛО: ";
+            cout << "Ошибка!\nВведите корректное число: ";
         };
     };
 };
@@ -173,8 +132,9 @@ void DisplayFound(const map<int, T>& container, const vector<int>& found_id, str
     cout << "\nНайденные " << name << ":\n--------------------------------------\n";
     if constexpr (is_same_v<T, Pipe>) {
         for (int i : found_id) {
-            cout << container.find(i)->second.name << " [ID:" << i << "] Статус в ремонте: ";
-            if (container.find(i)->second.repair == true) {
+            const Pipe& pipe = container.find(i)->second;
+            cout << pipe.getName() << " [ID:" << i << "] Статус в ремонте: ";
+            if (pipe.getRepair() == true) {
                 cout << "ДА" << endl;
             }
             else {
@@ -184,28 +144,57 @@ void DisplayFound(const map<int, T>& container, const vector<int>& found_id, str
     }
     else if constexpr (is_same_v<T, CS>) {
         for (int i : found_id) {
-            cout << container.find(i)->second.name << " [ID:" << i << "] Процент незайдествованных цехов в работе: " << container.find(i)->second.getUnusedPercent() << "% (" << container.find(i)->second.k_cex_in_work << "/" << container.find(i)->second.k_cex << ")" << endl;
+            const CS& cs = container.find(i)->second;
+            cout << cs.getName() << " [ID:" << i << "] Процент незадействованных цехов в работе: " << cs.getUnusedPercent() << "% (" << cs.getKCexInWork() << "/" << cs.getKCex() << ")" << endl;
         };
     };
     cout << "--------------------------------------\n\n";
 };
 
+template <typename T>
+vector<int> FoundName(map<int, T>& container, string nameClass)
+{
+    vector<int> found_id;
+    if (container.empty())
+    {
+        cout << "\nЭлементов нет\n\n";
+        return found_id;
+    };
+
+    cout << "\nВведите название " << nameClass << ": ";
+    string name;
+    getline(cin, name);
+
+    for (const auto& element : container) {
+        if (element.second.getName() == name) {
+            found_id.push_back(element.first);
+        };
+    };
+    if (found_id.empty()) {
+        cout << "\n" << nameClass << " не найдены!\n\n";
+        return found_id;
+    };
+    return found_id;
+};
+
 void AddPipe(map<int, Pipe>& pipe_list)
 {
-    Pipe newPipe;
+
+    string name;
     cout << "\nВведите название трубы: ";
-    getline(cin, newPipe.name);
+    getline(cin, name);
 
     cout << "Введите длину трубы (км): ";
-    newPipe.length = ProverkaFloat();
+    float length = ProverkaNumber<float>();
 
     cout << "Введите диаметр трубы (мм): ";
-    newPipe.diameter = ProverkaInt();
+    int diameter = ProverkaNumber<int>();
 
     string status;
     cout << "Труба на ремонте?(Yes/No): ";
-    newPipe.repair = CheckYesNo();
+    bool repair = CheckYesNo();
 
+    Pipe newPipe(name, length, diameter, repair);
     int ID = GetNextID(pipe_list);
     pipe_list[ID] = newPipe;
     cout << "\nНовая труба добавлена\n\n";
@@ -225,14 +214,14 @@ void EditPipe(map<int, Pipe>& pipe_list, vector<int>& found_id)
         getline(cin, status);
         if (status == "Yes" || status == "y" || status == "yes") {
             for (int i : found_id) {
-                pipe_list[i].repair = true;
+                pipe_list[i].setRepair(true);
             };
             cout << "\nСтатус \"в ремонте\" сменен на \"Да\"\n";
             break;
         }
         else if (status == "No" || status == "n" || status == "no") {
             for (int i : found_id) {
-                pipe_list[i].repair = false;
+                pipe_list[i].setRepair(false);
             };
             cout << "\nСтатус \"в ремонте\" сменен на \"Нет\"\n";
             break;
@@ -245,23 +234,26 @@ void EditPipe(map<int, Pipe>& pipe_list, vector<int>& found_id)
 
 void AddCS(map<int, CS>& cs_list)
 {
-    CS newCS;
+    
+    string name;
     cout << "\nВведите название КС: ";
-    getline(cin, newCS.name);
+    getline(cin, name);
 
     cout << "Введите общее количество цехов: ";
-    newCS.k_cex = ProverkaInt();
+    int k_cex = ProverkaNumber<int>();
 
     cout << "Введите количество цехов в работе: ";
-    newCS.k_cex_in_work = ProverkaInt();
-    if (newCS.k_cex_in_work > newCS.k_cex) {
+    int k_cex_in_work = ProverkaNumber<int>();
+    if (k_cex_in_work > k_cex) {
         cout << "Ошибка! Количество цехов в работе не может быть больше общего количества цехов\nВведите корректное число: ";
-        newCS.k_cex_in_work = ProverkaInt();
+        k_cex_in_work = ProverkaNumber<int>();
     };
 
+    string type;
     cout << "Введите тип КС: ";
-    getline(cin, newCS.type);
+    getline(cin, type);
 
+    CS newCS(name, k_cex, k_cex_in_work, type);
     int ID = GetNextID(cs_list);
     cs_list[ID] = newCS;
     cout << "\nНовая КС добавлена\n\n";
@@ -280,20 +272,17 @@ void EditCS(map<int, CS>& cs_list, vector<int>& found_id)
         cout << "--------------------------------------\n";
         cout << "Выберите опцию:\n1. Запустить цеха\n2. Остановить цеха\n3. Вернутся обратно\n";
         cout << "--------------------------------------\n\n";
-        int option = ProverkaInt();
+        int option = ProverkaNumber<int>();
 
         switch (option)
         {
         case 1:
         {
             cout << "\nВведите сколько цехов запустить: ";
-            int k = ProverkaInt();
+            int count = ProverkaNumber<int>();
             for (auto& element : found_id) {
-                if ((cs_list[element].k_cex_in_work + k) <= cs_list[element].k_cex) {
-                    cs_list[element].k_cex_in_work += k;
-                }
-                else {
-                    cout << "\nКоличество цехов которые вы хотите запустить превышает общее количество цехов!\n";
+                if (!cs_list[element].startWorkshops(count)) {
+                    cout << "\nНельзя запустить больше цехов чем доступно!\n";
                     break;
                 };
             };
@@ -302,13 +291,10 @@ void EditCS(map<int, CS>& cs_list, vector<int>& found_id)
         case 2:
         {
             cout << "\nВведите сколько цехов остановить: ";
-            int k = ProverkaInt();
+            int count = ProverkaNumber<int>();
             for (auto& element : found_id) {
-                if ((cs_list[element].k_cex_in_work - k) >= 0) {
-                    cs_list[element].k_cex_in_work -= k;
-                }
-                else {
-                    cout << "\nКоличество цехов которые вы хотите остановить больше чем уже запущенных цехов\n";
+                if (!cs_list[element].stopWorkshops(count)) {
+                    cout << "\nНельзя остановить больше цехов чем работает!\n";
                     break;
                 };
             };
@@ -328,7 +314,7 @@ void PacketEdit(map<int, T>& container, vector<int>& found_id, string name)
         cout << "--------------------------------------\n";
         cout << "Выберите опцию:\n1. Редактировать все найденные\n2. Редактировать один или несколько элементов в списке найденных\n3. Удалить все найденные\n4. Удалить один или несколько элементов в списке найденных\n5. Вернутся обратно\n";
         cout << "--------------------------------------\n\n";
-        int option = ProverkaInt();
+        int option = ProverkaNumber<int>();
 
         switch (option)
         {
@@ -388,7 +374,7 @@ void PipeMenu(map<int, Pipe>& pipe_list)
         cout << "--------------------------------------\n";
         cout << "Выберите опцию:\n1. Добавить трубу\n2. Найти по названию\n3. Найти по признаку \"в ремонте\"\n4. Выйти в главное меню\n";
         cout << "--------------------------------------\n\n";
-        int option = ProverkaInt();
+        int option = ProverkaNumber<int>();
         vector<int> found_id;
 
         switch (option)
@@ -397,27 +383,10 @@ void PipeMenu(map<int, Pipe>& pipe_list)
             AddPipe(pipe_list);
             break;
         case 2: {
-            if (pipe_list.empty())
-            {
-                cout << "\nТруб нет\n\n";
-                break;
+            found_id = FoundName(pipe_list, "трубы");
+            if (!found_id.empty()) {
+                PacketEdit(pipe_list, found_id, "трубы");
             };
-
-            found_id.clear();
-            cout << "\nВведите название трубы: ";
-            string name;
-            getline(cin, name);
-
-            for (const auto& element : pipe_list) {
-                if (element.second.name == name) {
-                    found_id.push_back(element.first);
-                };
-            };
-            if (found_id.empty()) {
-                cout << "\nТрубы не найдены!\n\n";
-                break;
-            };
-            PacketEdit(pipe_list, found_id, "трубы");
             break;
         };
         case 3:
@@ -434,7 +403,7 @@ void PipeMenu(map<int, Pipe>& pipe_list)
             bool status = CheckYesNo();
 
             for (const auto& element : pipe_list) {
-                if (element.second.repair == status) {
+                if (element.second.getRepair() == status) {
                     found_id.push_back(element.first);
                 };
             };
@@ -461,7 +430,7 @@ void CSMenu(map<int, CS>& cs_list)
         cout << "--------------------------------------\n";
         cout << "Выберите опцию:\n1. Добавить КС\n2. Найти по названию\n3. Найти по признаку проценту незадействованных\n4. Выйти в главное меню\n";
         cout << "--------------------------------------\n\n";
-        int option = ProverkaInt();
+        int option = ProverkaNumber<int>();
         vector<int> found_id;
 
         switch (option)
@@ -471,27 +440,10 @@ void CSMenu(map<int, CS>& cs_list)
             break;
         case 2:
         {
-            if (cs_list.empty())
-            {
-                cout << "\nКС нет\n\n";
-                break;
+            found_id = FoundName(cs_list, "КС");
+            if (!found_id.empty()) {
+                PacketEdit(cs_list, found_id, "КС");
             };
-
-            found_id.clear();
-            cout << "\nВведите название КС: ";
-            string name;
-            getline(cin, name);
-
-            for (const auto& element : cs_list) {
-                if (element.second.name == name) {
-                    found_id.push_back(element.first);
-                };
-            };
-            if (found_id.empty()) {
-                cout << "\nКС не найдены!\n\n";
-                break;
-            };
-            PacketEdit(cs_list, found_id, "КС");
             break;
         };
         case 3:
@@ -504,7 +456,7 @@ void CSMenu(map<int, CS>& cs_list)
 
             found_id.clear();
             cout << "\nВведите процент незадействованных цехов: ";
-            int percent = ProverkaFloat();
+            int percent = ProverkaNumber<int>();
 
             for (const auto& element : cs_list) {
                 if (element.second.getUnusedPercent() == percent) {
@@ -539,13 +491,13 @@ void ViewAllObjects(const map<int, Pipe>& pipe_list, const map<int, CS>& cs_list
 
         for (const auto& element : pipe_list) {
             cout << "Труба [ID:" << element.first << "]" << endl;
-            cout << "Название: " << element.second.name << endl;
-            cout << "Длина (км): " << element.second.length << endl;
-            cout << "Диаметр (мм): " << element.second.diameter << endl;
-            if (element.second.repair == false) {
+            cout << "Название: " << element.second.getName() << endl;
+            cout << "Длина (км): " << element.second.getLength() << endl;
+            cout << "Диаметр (мм): " << element.second.getDiameter() << endl;
+            if (element.second.getRepair() == false) {
                 cout << "В ремонте: Нет\n";
             }
-            else if (element.second.repair == true) {
+            else if (element.second.getRepair() == true) {
                 cout << "В ремонте: Да\n";
             };
             cout << "--------------------------------------\n";
@@ -561,10 +513,10 @@ void ViewAllObjects(const map<int, Pipe>& pipe_list, const map<int, CS>& cs_list
 
         for (const auto& element : cs_list) {
             cout << "КС [ID:" << element.first << "]" << endl;
-            cout << "Название: " << element.second.name << endl;
-            cout << "Общее количество цехов: " << element.second.k_cex << endl;
-            cout << "Количество цехов в работе: " << element.second.k_cex_in_work << endl;
-            cout << "Тип: " << element.second.type << endl;
+            cout << "Название: " << element.second.getName() << endl;
+            cout << "Общее количество цехов: " << element.second.getKCex() << endl;
+            cout << "Количество цехов в работе: " << element.second.getKCexInWork() << endl;
+            cout << "Тип: " << element.second.getType() << endl;
             cout << "--------------------------------------\n";
         };
         cout << endl;
@@ -583,7 +535,7 @@ void Save(const map<int, Pipe>& pipe_list, const map<int, CS>& cs_list)
         if (!(pipe_list.empty())) {
             save << "ТРУБЫ\n";
             for (const auto& element : pipe_list) {
-                save << element.first << "|" << element.second.name << "|" << element.second.length << "|" << element.second.diameter << "|" << element.second.repair << "|" << endl;
+                save << element.first << "|" << element.second.getName() << "|" << element.second.getLength() << "|" << element.second.getDiameter() << "|" << element.second.getRepair() << "|" << endl;
             };
             cout << "\nСписок труб сохранен!\n";
         }
@@ -595,7 +547,7 @@ void Save(const map<int, Pipe>& pipe_list, const map<int, CS>& cs_list)
         if (!(cs_list.empty())) {
             save << "КС\n";
             for (const auto& element : cs_list) {
-                save << element.first << "|" << element.second.name << "|" << element.second.k_cex << "|" << element.second.k_cex_in_work << "|" << element.second.type << "|" << endl;
+                save << element.first << "|" << element.second.getName() << "|" << element.second.getKCex() << "|" << element.second.getKCexInWork() << "|" << element.second.getType() << "|" << endl;
             };
             cout << "Список КС сохранен!\n\n";
         }
@@ -666,28 +618,13 @@ void Upload(map<int, Pipe>& pipe_list, map<int, CS>& cs_list)
 
         if (state == "Trubs") {
             int ID = stoi(sub[0]);
-            Pipe newPipe;
-            newPipe.name = sub[1];
-            newPipe.length = stof(sub[2]);
-            newPipe.diameter = stoi(sub[3]);
-            if (stoi(sub[4]) == 1) {
-                newPipe.repair = true;
-            }
-            else {
-                newPipe.repair = false;
-            };
-
+            Pipe newPipe(sub[1], stof(sub[2]), stoi(sub[3]), stoi(sub[4]));
             pipe_list.emplace(ID, newPipe);
         };
 
         if (state == "CS") {
             int ID = stoi(sub[0]);
-            CS newCS;
-            newCS.name = sub[1];
-            newCS.k_cex = stoi(sub[2]);
-            newCS.k_cex_in_work = stoi(sub[3]);
-            newCS.type = sub[4];
-
+            CS newCS(sub[1], stoi(sub[2]), stoi(sub[3]), sub[4]);
             cs_list.emplace(ID, newCS);
         };
     };
@@ -702,7 +639,7 @@ void Menu(map<int, Pipe>& pipe_list, map<int, CS>& cs_list)
         cout << "Выберите опцию:\n1. Меню труб\n2. Меню КС\n3. Просмотр всех объектов\n4. Сохранить\n5. Загрузить\n9. Выход\n";
         cout << "--------------------------------------\n\n";
         int option;
-        option = ProverkaInt();
+        option = ProverkaNumber<int>();
 
         switch (option)
         {
