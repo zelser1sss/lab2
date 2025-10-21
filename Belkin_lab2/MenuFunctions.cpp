@@ -1,4 +1,5 @@
 #include "MenuFunctions.h"
+#include "Logger.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -13,12 +14,14 @@ void AddPipe(std::map<int, Pipe>& pipe_list)
     pipe_list[newId] = newPipe;
 
     std::cout << "\nНовая труба добавлена\n\n";
+    Logger::logAction("Добавлена труба", newId);
 };
 
 void EditPipe(std::map<int, Pipe>& pipe_list, std::vector<int>& found_id)
 {
     if (found_id.empty()) {
         std::cout << "\nТруб нет!\n";
+        Logger::logError("Нет труб для редактирования");
         return;
     };
 
@@ -29,6 +32,7 @@ void EditPipe(std::map<int, Pipe>& pipe_list, std::vector<int>& found_id)
         if (status == "Yes" || status == "y" || status == "yes") {
             for (int i : found_id) {
                 pipe_list[i].setRepair(true);
+                Logger::logAction("Труба переведена в ремонт", i);
             };
             std::cout << "\nСтатус \"в ремонте\" сменен на \"Да\"\n";
             break;
@@ -36,6 +40,7 @@ void EditPipe(std::map<int, Pipe>& pipe_list, std::vector<int>& found_id)
         else if (status == "No" || status == "n" || status == "no") {
             for (int i : found_id) {
                 pipe_list[i].setRepair(false);
+                Logger::logAction("Труба снята с ремонта", i);
             };
             std::cout << "\nСтатус \"в ремонте\" сменен на \"Нет\"\n";
             break;
@@ -56,12 +61,14 @@ void AddCS(std::map<int, CS>& cs_list)
     cs_list[newId] = newCS;
 
     std::cout << "\nНовая КС добавлена\n\n";
+    Logger::logAction("Добавлена КС", newId);
 };
 
 void EditCS(std::map<int, CS>& cs_list, std::vector<int>& found_id)
 {
     if (found_id.empty()) {
         std::cout << "\nКС нет!\n";
+        Logger::logError("Нет КС для редактирования");
         return;
     };
 
@@ -82,7 +89,11 @@ void EditCS(std::map<int, CS>& cs_list, std::vector<int>& found_id)
             for (auto& element : found_id) {
                 if (!cs_list[element].startWorkshops(count)) {
                     std::cout << "\nНельзя запустить больше цехов чем доступно!\n";
+                    Logger::logError("Нельзя запустить больше цехов чем доступно для КС ID:" + std::to_string(element));
                     break;
+                }
+                else {
+                    Logger::logAction("Запущено " + std::to_string(count) + " цехов в КС", element);
                 };
             };
             break;
@@ -94,7 +105,11 @@ void EditCS(std::map<int, CS>& cs_list, std::vector<int>& found_id)
             for (auto& element : found_id) {
                 if (!cs_list[element].stopWorkshops(count)) {
                     std::cout << "\nНельзя остановить больше цехов чем работает!\n";
+                    Logger::logError("Нельзя остановить больше цехов чем работает для КС ID:" + std::to_string(element));
                     break;
+                }
+                else {
+                    Logger::logAction("Остановлено " + std::to_string(count) + " цехов в КС", element);
                 };
             };
             break;
@@ -107,6 +122,9 @@ void EditCS(std::map<int, CS>& cs_list, std::vector<int>& found_id)
 
 void PipeMenu(std::map<int, Pipe>& pipe_list)
 {
+
+    Logger::log("Вход в меню труб");
+
     while (1) {
         std::cout << "--------------------------------------\n";
         std::cout << "Выберите опцию:\n1. Добавить трубу\n2. Найти по названию\n3. Найти по признаку \"в ремонте\"\n4. Выйти в главное меню\n";
@@ -120,6 +138,7 @@ void PipeMenu(std::map<int, Pipe>& pipe_list)
             AddPipe(pipe_list);
             break;
         case 2: {
+            Logger::log("Поиск труб по названию");
             found_id = FoundName(pipe_list, "трубы");
             if (!found_id.empty()) {
                 PacketEdit(pipe_list, found_id, "трубы");
@@ -128,6 +147,7 @@ void PipeMenu(std::map<int, Pipe>& pipe_list)
         };
         case 3:
         {
+            Logger::log("Поиск труб по статусу ремонта");
             if (pipe_list.empty())
             {
                 std::cout << "\nТруб нет\n\n";
@@ -152,9 +172,11 @@ void PipeMenu(std::map<int, Pipe>& pipe_list)
         };
         case 4:
             std::cout << "\nВозвращаемся в главное меню...\n\n";
+            Logger::log("Выход из меню труб");
             return;
         default:
             std::cout << "Неизвестная опция. Попробуйте еще раз\n\n";
+            Logger::logError("Неизвестная опция в меню труб: " + std::to_string(option));
             break;
         };
     };
@@ -162,6 +184,8 @@ void PipeMenu(std::map<int, Pipe>& pipe_list)
 
 void CSMenu(std::map<int, CS>& cs_list)
 {
+    Logger::log("Вход в меню КС");
+
     while (1) {
         std::cout << "--------------------------------------\n";
         std::cout << "Выберите опцию:\n1. Добавить КС\n2. Найти по названию\n3. Найти по признаку проценту незадействованных\n4. Выйти в главное меню\n";
@@ -176,6 +200,7 @@ void CSMenu(std::map<int, CS>& cs_list)
             break;
         case 2:
         {
+            Logger::log("Поиск КС по названию");
             found_id = FoundName(cs_list, "КС");
             if (!found_id.empty()) {
                 PacketEdit(cs_list, found_id, "КС");
@@ -184,6 +209,7 @@ void CSMenu(std::map<int, CS>& cs_list)
         };
         case 3:
         {
+            Logger::log("Поиск КС по проценту незадействованных");
             if (cs_list.empty())
             {
                 std::cout << "\nКС нет\n\n";
@@ -208,9 +234,11 @@ void CSMenu(std::map<int, CS>& cs_list)
         };
         case 4:
             std::cout << "\nВозвращаемся в главное меню...\n\n";
+            Logger::log("Выход из меню КС");
             return;
         default:
             std::cout << "Неизвестная опция. Попробуйте еще раз\n\n";
+            Logger::logError("Неизвестная опция в меню КС: " + std::to_string(option));
             break;
         };
     };
@@ -246,6 +274,8 @@ void Save(const std::map<int, Pipe>& pipe_list, const std::map<int, CS>& cs_list
     std::cout << "\nВведите название файла: ";
     getline(std::cin, file);
 
+    Logger::log("Сохранение данных в файл: " + file);
+
     std::ofstream save;
     save.open(file);
     if (save.is_open()) {
@@ -255,6 +285,7 @@ void Save(const std::map<int, Pipe>& pipe_list, const std::map<int, CS>& cs_list
                 save << element.second.getId() << "|" << element.second.getName() << "|" << element.second.getLength() << "|" << element.second.getDiameter() << "|" << element.second.getRepair() << "|" << std::endl;
             };
             std::cout << "\nСписок труб сохранен!\n";
+            Logger::log("Сохранено " + std::to_string(pipe_list.size()) + " труб");
         }
         else {
             save << "ТРУБ НЕТ\n";
@@ -267,6 +298,7 @@ void Save(const std::map<int, Pipe>& pipe_list, const std::map<int, CS>& cs_list
                 save << element.second.getId() << "|" << element.second.getName() << "|" << element.second.getKCex() << "|" << element.second.getKCexInWork() << "|" << element.second.getType() << "|" << std::endl;
             };
             std::cout << "Список КС сохранен!\n\n";
+            Logger::log("Сохранено " + std::to_string(cs_list.size()) + " КС");
         }
         else {
             save << "КС НЕТ";
@@ -275,6 +307,7 @@ void Save(const std::map<int, Pipe>& pipe_list, const std::map<int, CS>& cs_list
     }
     else {
         std::cout << "\nНедопустимое имя файла!\n\n";
+        Logger::logError("Не удалось открыть файл для сохранения: " + file);
         return;
     };
 };
@@ -285,17 +318,23 @@ void Upload(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list)
     std::cout << "\nВведите имя файла: ";
     getline(std::cin, file);
 
+    Logger::log("Загрузка данных из файла: " + file);
+
     std::string line;
     std::string state = "None";
     std::ifstream upload(file);
 
     if (!(upload.is_open())) {
         std::cout << "\nФайл '" << file << "' не найден\n\n";
+        Logger::logError("Файл не найден: " + file);
         return;
     };
 
     pipe_list.clear();
     cs_list.clear();
+
+    int pipeCount = 0;
+    int csCount = 0;
 
     while (getline(upload, line)) {
         if (line.empty() || line.find_first_not_of(' ') == std::string::npos) {
@@ -336,20 +375,25 @@ void Upload(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list)
             int ID = stoi(sub[0]);
             Pipe newPipe(ID, sub[1], stof(sub[2]), stoi(sub[3]), stoi(sub[4]));
             pipe_list.emplace(ID, newPipe);
+            pipeCount++;
         };
 
         if (state == "CS") {
             int ID = stoi(sub[0]);
             CS newCS(ID, sub[1], stoi(sub[2]), stoi(sub[3]), sub[4]);
             cs_list.emplace(ID, newCS);
+            csCount++;
         };
     };
+    Logger::log("Загружено " + std::to_string(pipeCount) + " труб и " + std::to_string(csCount) + " КС");
     std::cout << std::endl;
     upload.close();
 };
 
 void Menu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list)
 {
+    Logger::log("Программа запущена");
+
     while (1) {
         std::cout << "--------------------------------------\n";
         std::cout << "Выберите опцию:\n1. Меню труб\n2. Меню КС\n3. Просмотр всех объектов\n4. Сохранить\n5. Загрузить\n9. Выход\n";
@@ -368,6 +412,7 @@ void Menu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list)
             CSMenu(cs_list);
             break;
         case 3:
+            Logger::log("Просмотр всех объектов");
             ViewAllObjects(pipe_list, cs_list);
             break;
         case 4:
@@ -378,9 +423,11 @@ void Menu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list)
             break;
         case 9:
             std::cout << "\nВыходим...\n";
+            Logger::log("Выход из программы");
             return;
         default:
             std::cout << "Неизвестная опция. Попробуйте еще раз\n\n";
+            Logger::logError("Неизвестная опция в меню: " + std::to_string(option));
             break;
         };
     };
