@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <string>
 #include <vector>
 #include <map>
@@ -31,5 +32,7 @@ public:
 	void setDiameter(int newDiameter) { diameter = newDiameter; }
 	void setRepair(bool newRepair) { repair = newRepair; }
 
+	friend std::ostream& operator<<(std::ostream& out, const Pipe& pipe);
+	friend std::istream& operator>>(std::istream& in, Pipe& pipe);
 };
 
