@@ -333,8 +333,8 @@ void Upload(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list)
     pipe_list.clear();
     cs_list.clear();
 
-    int pipeCount = 0;
-    int csCount = 0;
+    int maxPipeId = 0;
+    int maxCsId = 0;
 
     while (getline(upload, line)) {
         if (line.empty() || line.find_first_not_of(' ') == std::string::npos) {
@@ -375,17 +375,25 @@ void Upload(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list)
             int ID = stoi(sub[0]);
             Pipe newPipe(ID, sub[1], stof(sub[2]), stoi(sub[3]), stoi(sub[4]));
             pipe_list.emplace(ID, newPipe);
-            pipeCount++;
+            if (ID > maxPipeId) maxPipeId = ID;
         };
 
         if (state == "CS") {
             int ID = stoi(sub[0]);
             CS newCS(ID, sub[1], stoi(sub[2]), stoi(sub[3]), sub[4]);
             cs_list.emplace(ID, newCS);
-            csCount++;
+            if (ID > maxCsId) maxCsId = ID;
         };
     };
-    Logger::log("Загружено " + std::to_string(pipeCount) + " труб и " + std::to_string(csCount) + " КС");
+
+    if (maxPipeId > 0) {
+        IdManager::Update(pipe_list, "pipe");
+    };
+    if (maxCsId > 0) {
+        IdManager::Update(cs_list, "cs");
+    };
+
+    Logger::log("Загружено " + std::to_string(pipe_list.size()) + " труб и " + std::to_string(cs_list.size()) + " КС");
     std::cout << std::endl;
     upload.close();
 };

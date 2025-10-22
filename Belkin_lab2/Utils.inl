@@ -1,15 +1,20 @@
 #ifndef UTILS_INL
 #define UTILS_INL
 
+#include "IdManager.h"
+
 template<typename T>
 int GetNextID(const std::map<int, T>& container)
 {
-    if (container.empty()) {
-        return 1;
+    if constexpr (std::is_same_v<T, Pipe>) {
+        IdManager::Update(container, "pipe");
+        return IdManager::GetNextID("pipe");
     }
-    else {
-        return container.rbegin()->first + 1;
+    else if constexpr (std::is_same_v<T, CS>) {
+        IdManager::Update(container, "cs");
+        return IdManager::GetNextID("cs");
     };
+    return 1;
 };
 
 template<typename T>
@@ -68,7 +73,7 @@ std::vector<int> FoundName(std::map<int, T>& container, std::string nameClass)
     getline(std::cin, name);
 
     for (const auto& element : container) {
-        if (element.second.getName() == name) {
+        if (element.second.getName().find(name) != std::string::npos) {
             found_id.push_back(element.first);
         };
     };
