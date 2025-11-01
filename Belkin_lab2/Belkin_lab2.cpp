@@ -12,6 +12,7 @@
 #include "Utils.h"
 #include "MenuFunctions.h"
 #include "Logger.h"
+#include "Graph.h"
 using namespace std;
 
 
@@ -22,7 +23,8 @@ int main()
 
     map<int, Pipe> pipe_list;
     map<int, CS> cs_list;
-    Menu(pipe_list, cs_list);
+    map<int, Node*> graph;
+    Menu(pipe_list, cs_list, graph);
 
     Logger::log("=== ПРОГРАММА ЗАВЕРШЕНА ===");
 }

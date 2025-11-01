@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include <vector>
+#include "Pipe.h"
 
 class CS
 {
@@ -32,6 +34,7 @@ public:
 	float getUnusedPercent() const;
 	bool startWorkshops(int count);
 	bool stopWorkshops(int count);
+
 
 	friend std::ostream& operator<<(std::ostream& out, const CS& cs);
 	friend std::istream& operator>>(std::istream& in, CS& cs);

@@ -40,7 +40,7 @@ void DisplayFound(const std::map<int, T>& container, const std::vector<int>& fou
     if constexpr (std::is_same_v<T, Pipe>) {
         for (int i : found_id) {
             const Pipe& pipe = container.find(i)->second;
-            std::cout << pipe.getName() << " [ID:" << pipe.getId() << "] Статус в ремонте: ";
+            std::cout << pipe.getName() << " [ID:" << pipe.getId() << "] Диаметр(мм): " << pipe.getDiameter() << " | Статус в ремонте : ";
             if (pipe.getRepair() == true) {
                 std::cout << "ДА" << std::endl;
             }
@@ -52,7 +52,7 @@ void DisplayFound(const std::map<int, T>& container, const std::vector<int>& fou
     else if constexpr (std::is_same_v<T, CS>) {
         for (int i : found_id) {
             const CS& cs = container.find(i)->second;
-            std::cout << cs.getName() << " [ID:" << cs.getId() << "] Процент незадействованных цехов в работе: " << cs.getUnusedPercent() << "% (" << cs.getKCexInWork() << "/" << cs.getKCex() << ")" << std::endl;
+            std::cout << cs.getName() << " [ID:" << cs.getId() << "]\nПроцент незадействованных цехов в работе: " << cs.getUnusedPercent() << "% (" << cs.getKCexInWork() << "/" << cs.getKCex() << ")" << std::endl;
         };
     };
     std::cout << "--------------------------------------\n\n";

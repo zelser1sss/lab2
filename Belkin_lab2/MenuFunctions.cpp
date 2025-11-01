@@ -1,5 +1,7 @@
 #include "MenuFunctions.h"
 #include "Logger.h"
+#include "Graph.h"
+#include "GraphMenu.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -398,13 +400,13 @@ void Upload(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list)
     upload.close();
 };
 
-void Menu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list)
+void Menu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::map<int, Node*>& graph)
 {
     Logger::log("Программа запущена");
 
     while (1) {
         std::cout << "--------------------------------------\n";
-        std::cout << "Выберите опцию:\n1. Меню труб\n2. Меню КС\n3. Просмотр всех объектов\n4. Сохранить\n5. Загрузить\n9. Выход\n";
+        std::cout << "Выберите опцию:\n1. Меню труб\n2. Меню КС\n3. Просмотр всех объектов\n4. Меню графов\n5. Сохранить\n6. Загрузить\n9. Выход\n";
         std::cout << "--------------------------------------\n\n";
         int option;
         option = ProverkaNumber<int>();
@@ -424,9 +426,12 @@ void Menu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list)
             ViewAllObjects(pipe_list, cs_list);
             break;
         case 4:
-            Save(pipe_list, cs_list);
+            GraphMenu(pipe_list, cs_list, graph);
             break;
         case 5:
+            Save(pipe_list, cs_list);
+            break;
+        case 6:
             Upload(pipe_list, cs_list);
             break;
         case 9:
