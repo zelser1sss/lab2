@@ -6,9 +6,10 @@
 #include <fstream>
 #include <sstream>
 
-void AddPipe(std::map<int, Pipe>& pipe_list)
+void AddPipe(std::map<int, Pipe>& pipe_list, int forced_diameter)
 {
     Pipe newPipe;
+    newPipe.setDiameter(forced_diameter);
     std::cin >> newPipe;
 
     int newId = GetNextID(pipe_list);
@@ -53,9 +54,10 @@ void EditPipe(std::map<int, Pipe>& pipe_list, std::vector<int>& found_id)
     };
 };
 
-void AddCS(std::map<int, CS>& cs_list)
+void AddCS(std::map<int, CS>& cs_list, std::string forced_type)
 {
     CS newCS;
+    newCS.setType(forced_type);
     std::cin >> newCS;
 
     int newId = GetNextID(cs_list);
@@ -122,7 +124,7 @@ void EditCS(std::map<int, CS>& cs_list, std::vector<int>& found_id)
     };
 };
 
-void PipeMenu(std::map<int, Pipe>& pipe_list)
+void PipeMenu(std::map<int, Pipe>& pipe_list, std::unordered_map<int, Node*>& graph)
 {
 
     Logger::log("Вход в меню труб");
@@ -137,13 +139,13 @@ void PipeMenu(std::map<int, Pipe>& pipe_list)
         switch (option)
         {
         case 1:
-            AddPipe(pipe_list);
+            AddPipe(pipe_list, 0);
             break;
         case 2: {
             Logger::log("Поиск труб по названию");
             found_id = FoundName(pipe_list, "трубы");
             if (!found_id.empty()) {
-                PacketEdit(pipe_list, found_id, "трубы");
+                PacketEdit(pipe_list, found_id, "трубы", graph);
             };
             break;
         };
@@ -169,7 +171,7 @@ void PipeMenu(std::map<int, Pipe>& pipe_list)
                 std::cout << "\nТрубы не найдены!\n\n";
                 break;
             };
-            PacketEdit(pipe_list, found_id, "трубы");
+            PacketEdit(pipe_list, found_id, "трубы", graph);
             break;
         };
         case 4:
@@ -184,7 +186,7 @@ void PipeMenu(std::map<int, Pipe>& pipe_list)
     };
 };
 
-void CSMenu(std::map<int, CS>& cs_list)
+void CSMenu(std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph)
 {
     Logger::log("Вход в меню КС");
 
@@ -198,14 +200,14 @@ void CSMenu(std::map<int, CS>& cs_list)
         switch (option)
         {
         case 1:
-            AddCS(cs_list);
+            AddCS(cs_list, "-");
             break;
         case 2:
         {
             Logger::log("Поиск КС по названию");
             found_id = FoundName(cs_list, "КС");
             if (!found_id.empty()) {
-                PacketEdit(cs_list, found_id, "КС");
+                PacketEdit(cs_list, found_id, "КС", graph);
             };
             break;
         };
@@ -231,7 +233,7 @@ void CSMenu(std::map<int, CS>& cs_list)
                 std::cout << "\nКС не найдены!\n\n";
                 break;
             };
-            PacketEdit(cs_list, found_id, "КС");
+            PacketEdit(cs_list, found_id, "КС", graph);
             break;
         };
         case 4:
@@ -415,11 +417,11 @@ void Menu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unord
         {
         case 1:
             std::cout << std::endl;
-            PipeMenu(pipe_list);
+            PipeMenu(pipe_list, graph);
             break;
         case 2:
             std::cout << std::endl;
-            CSMenu(cs_list);
+            CSMenu(cs_list, graph);
             break;
         case 3:
             Logger::log("Просмотр всех объектов");

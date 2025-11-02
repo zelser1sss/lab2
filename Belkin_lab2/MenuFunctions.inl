@@ -2,7 +2,7 @@
 #define MENUFUNCTIONS_INL
 
 template <typename T>
-void PacketEdit(std::map<int, T>& container, std::vector<int>& found_id, std::string name)
+void PacketEdit(std::map<int, T>& container, std::vector<int>& found_id, std::string name, std::unordered_map<int, Node*>& graph)
 {
     while (1) {
         DisplayFound(container, found_id, name);
@@ -38,7 +38,7 @@ void PacketEdit(std::map<int, T>& container, std::vector<int>& found_id, std::st
                 std::cout << "\nЁлементов нет!\n";
                 break;
             };
-            Delete(container, found_id, found_id);
+            Delete(container, found_id, found_id, graph);
             std::cout << "\nЁлементы удалены!\n\n";
             return;
         case 4:
@@ -50,7 +50,7 @@ void PacketEdit(std::map<int, T>& container, std::vector<int>& found_id, std::st
                 std::cout << "\nЁлементов нет!\n";
                 break;
             };
-            Delete(container, found_id, select_id);
+            Delete(container, found_id, select_id, graph);
             std::cout << "\nЁлементы удалены!\n";
             break;
         };

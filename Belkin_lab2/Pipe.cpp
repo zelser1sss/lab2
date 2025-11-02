@@ -22,8 +22,14 @@ std::istream& operator>>(std::istream& in, Pipe& pipe) {
     std::cout << "¬ведите длину трубы (км): ";
     pipe.length = ProverkaNumber<float>();
 
-    std::cout << "¬ведите диаметр трубы (мм): ";
-    pipe.diameter = ProverkaNumber<int>();
+    if (pipe.diameter == 0) {
+        std::cout << "¬ведите диаметр трубы (мм): ";
+        pipe.diameter = ProverkaNumber<int>();
+    }
+    else {
+        std::cout << "ƒиаметр трубы: " << pipe.diameter << " мм (установлен автоматически)\n";
+    };
+    
 
     std::cout << "“руба на ремонте?(Yes/No): ";
     pipe.repair = CheckYesNo();

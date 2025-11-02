@@ -3,8 +3,6 @@
 #include "Validation.h"
 #include "Utils.h"
 #include "Graph.h"
-#include <vector>
-#include <unordered_set>
 
 bool isPipeUsed(const std::unordered_map<int, Node*>& graph, int pipe_id)
 {
@@ -60,7 +58,7 @@ void CreateGraph(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std
     adjacentNode->parents[node] = edge;
 };
 
-std::vector<int> FoundDiameter(std::map<int, Pipe>& pipe_list, std::unordered_map<int, Node*>& graph)
+int FoundDiameter(std::map<int, Pipe>& pipe_list, std::unordered_map<int, Node*>& graph)
 {
     std::vector<int> found_id;
 
@@ -83,16 +81,111 @@ std::vector<int> FoundDiameter(std::map<int, Pipe>& pipe_list, std::unordered_ma
             found_id.push_back(element.first);
         };
     };
+
     if (found_id.empty()) {
-        std::cout << "\nТрубы с таким диаметром найдены!\n";
+        std::cout << "\nТрубы с таким диаметром не найдены!\n";
         std::cout << "Перейдем к созданию трубы...\n";
-        AddPipe(pipe_list);
-        pipe_list.rbegin()->second.setDiameter(input_diameter);
-        std::cout << pipe_list.rbegin()->second;
+        AddPipe(pipe_list, input_diameter);
         found_id.push_back(pipe_list.rbegin()->first);
     };
 
-    return found_id;
+    DisplayFound(pipe_list, found_id, "трубы");
+
+    std::cout << "Введите ID трубы: ";
+    int pipe_id;
+    bool is_selected;
+    do {
+        is_selected = true;
+        pipe_id = ProverkaNumber<int>();
+        for (auto& found_pipe_id : found_id)
+        {
+            if (pipe_id == found_pipe_id) {
+                is_selected = false;
+            };
+        };
+        if (is_selected) {
+            std::cout << "Введите ID трубы в списке найденных труб: ";
+        }
+    } while (is_selected);
+
+    return pipe_id;
+};
+
+void FoundType(std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph, int& cs_start, int& cs_end)
+{
+
+    bool is_selected = true;
+    std::cout << "\nВведите ID КС от которой хотите провести трубу: ";
+    do {
+        cs_start = ProverkaNumber<int>();
+        if (cs_list.find(cs_start) != cs_list.end()) {
+            is_selected = false;
+        }
+        else {
+            std::cout << "КС с ID " << cs_start << " не существует\nВведите существующий ID КС: ";
+        };
+    } while (is_selected);
+
+    std::cout << "Тип выбранной станции: " << cs_list[cs_start].getType() << std::endl;
+
+    std::vector<int> all_same_type;
+    for (const auto& element : cs_list)
+    {
+        if (element.second.getType() == cs_list[cs_start].getType() && element.first != cs_start) {
+            all_same_type.push_back(element.first);
+        };
+    };
+
+    if (all_same_type.empty()) {
+        std::cout << "\nКС с таким типом не найдены!\n";
+        std::cout << "Перейдем к созданию КС...\n";
+        AddCS(cs_list, cs_list[cs_start].getType());
+        all_same_type.push_back(cs_list.rbegin()->first);
+    };
+
+    std::vector<int> found_id;
+    if (graph.find(cs_start) != graph.end()) {
+        Node* startNode = graph[cs_start];
+        std::unordered_set<int> connected_cs;
+
+        for (const Edge* edge : startNode->edges) {
+            connected_cs.insert(edge->adjacentNode->cs->getId());
+        }
+
+        for (int cs_id : all_same_type) {
+            if (connected_cs.find(cs_id) == connected_cs.end()) {
+                found_id.push_back(cs_id);
+            }
+        }
+    }
+    else {
+        found_id = all_same_type;
+    }
+
+    if (found_id.empty()) {
+        std::cout << "\nНет доступных КС для соединения! Ко всем КС этого типа уже есть соединение из КС [ID:" << cs_start << "]\n";
+        std::cout << "Перейдем к созданию новой КС...\n";
+        AddCS(cs_list, cs_list[cs_start].getType());
+        found_id.push_back(cs_list.rbegin()->first);
+    };
+
+    DisplayFound(cs_list, found_id, "КС");
+
+    std::cout << "Введите ID КС к которой хотите провести трубу: ";
+    is_selected = true;
+    do {
+        is_selected = true;
+        cs_end = ProverkaNumber<int>();
+        for (auto& found_pipe_id : found_id)
+        {
+            if (cs_end == found_pipe_id) {
+                is_selected = false;
+            };
+        };
+        if (is_selected) {
+            std::cout << "Введите ID КС в списке найденных КС: ";
+        }
+    } while (is_selected);
 };
 
 void RemoveEdge(std::unordered_map<int, Node*>& graph, std::vector<int>& pipe_id)
@@ -172,23 +265,6 @@ void RemoveNode(std::unordered_map<int, Node*>& graph, std::vector<int>& cs_ids)
     }
 };
 
-int isCSReal(std::map<int, CS>& cs_list)
-{
-    bool is_selected = true;
-    int cs_id;
-    do {
-        cs_id = ProverkaNumber<int>();
-        if (cs_list.find(cs_id) != cs_list.end()) {
-            is_selected = false;
-        }
-        else {
-            std::cout << "КС с ID " << cs_id << " не существует\nВведите существующий ID КС: ";
-        };
-    } while (is_selected);
-    
-    return cs_id;
-};
-
 void FunctionToCreateGraph(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph)
 {
     std::vector<int> selected_data;
@@ -199,41 +275,12 @@ void FunctionToCreateGraph(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs
         return;
     };
 
-    std::vector<int> found_id = FoundDiameter(pipe_list, graph);
-    DisplayFound(pipe_list, found_id, "трубы");
+    int pipe_id = FoundDiameter(pipe_list, graph);
 
-    std::cout << "Введите ID трубы: ";
-    int pipe_id;
-    bool is_selected;
-    do {
-        is_selected = true;
-        pipe_id = ProverkaNumber<int>();
-        for (auto& found_pipe_id : found_id)
-        {
-            if (pipe_id == found_pipe_id) {
-                is_selected = false;
-            };
-        };
-        if (is_selected) {
-            std::cout << "Введите ID трубы в списке найденных труб: ";
-        }
-    } while (is_selected);
-
-    is_selected = true;
     int cs_start;
     int cs_end;
-    do {
-        std::cout << "\nВведите ID КС от которой будет идти труба: ";
-        cs_start = isCSReal(cs_list);
-        std::cout << "Введите ID КС к которой будет идти труба: ";
-        cs_end = isCSReal(cs_list);
-        if (cs_list[cs_start].getType() == cs_list[cs_end].getType()) {
-            is_selected = false;
-            break;
-        }
-        std::cout << "\nТип станции входа [ID:" << cs_start << "]: " << cs_list[cs_start].getType() << "\nТип станции выхода[ID:" << cs_end << "]: " << cs_list[cs_end].getType() << std::endl;
-        std::cout << "Введите станции с одинаковым типом\n";
-    } while (is_selected);
+
+    FoundType(cs_list, graph, cs_start, cs_end);
     
     selected_data.push_back(cs_start);
     selected_data.push_back(cs_end);
@@ -292,7 +339,7 @@ void GraphMenu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::
 {
     while (1) {
         std::cout << "\n--------------------------------------\n";
-        std::cout << "Выберите опцию:\n1. Добавить граф\n2. Удалить трубу из графа\n3. Удалить КС из графа\n9. Выход\n";
+        std::cout << "Выберите опцию:\n1. Добавить граф\n2. Удалить трубу из графа\n3. Удалить КС из графа\n9. Вернутся в главное меню\n";
         std::cout << "--------------------------------------\n\n";
         int option;
         option = ProverkaNumber<int>();

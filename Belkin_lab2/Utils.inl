@@ -2,6 +2,10 @@
 #define UTILS_INL
 
 #include "IdManager.h"
+#include <map>
+#include <vector>
+#include <unordered_map>
+#include "Graph.h"
 
 template<typename T>
 int GetNextID(const std::map<int, T>& container)
@@ -18,8 +22,15 @@ int GetNextID(const std::map<int, T>& container)
 };
 
 template<typename T>
-void Delete(std::map<int, T>& container, std::vector<int>& found_id, std::vector<int> select_id)
+void Delete(std::map<int, T>& container, std::vector<int>& found_id, std::vector<int> select_id, std::unordered_map<int, Node*>& graph)
 {
+    if constexpr (std::is_same_v<T, Pipe>) {
+        RemoveEdge(graph, select_id);
+    }
+    else if constexpr (std::is_same_v<T, CS>) {
+        RemoveNode(graph, select_id);
+    };
+
     for (int i : select_id) {
         container.erase(i);
     };
@@ -52,7 +63,7 @@ void DisplayFound(const std::map<int, T>& container, const std::vector<int>& fou
     else if constexpr (std::is_same_v<T, CS>) {
         for (int i : found_id) {
             const CS& cs = container.find(i)->second;
-            std::cout << cs.getName() << " [ID:" << cs.getId() << "]\nПроцент незадействованных цехов в работе: " << cs.getUnusedPercent() << "% (" << cs.getKCexInWork() << "/" << cs.getKCex() << ")" << std::endl;
+            std::cout << cs.getName() << " [ID:" << cs.getId() << "] Тип: " << cs.getType() << " | Незадействованные цеха : " << cs.getUnusedPercent() << " % (" << cs.getKCexInWork() << " / " << cs.getKCex() << ")" << std::endl;
         };
     };
     std::cout << "--------------------------------------\n\n";

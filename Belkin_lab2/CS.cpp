@@ -51,8 +51,12 @@ std::istream& operator>>(std::istream& in, CS& cs) {
         cs.k_cex_in_work = ProverkaNumber<int>();
     };
 
-    std::cout << "Введите тип КС: ";
-    getline(std::cin, cs.type);
-
+    if (cs.type == "-") {
+        std::cout << "Введите тип КС: ";
+        getline(std::cin, cs.type);
+    }
+    else {
+        std::cout << "Тип: " << cs.type << " (установлен автоматически)\n";
+    };
     return in;
 };
