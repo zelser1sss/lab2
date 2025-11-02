@@ -4,8 +4,9 @@
 #include "Utils.h"
 #include "Graph.h"
 #include <vector>
+#include <unordered_set>
 
-bool isPipeUsed(const std::map<int, Node*>& graph, int pipe_id)
+bool isPipeUsed(const std::unordered_map<int, Node*>& graph, int pipe_id)
 {
     for (const auto& node_pair : graph) {
         Node* node = node_pair.second;
@@ -26,7 +27,7 @@ bool isPipeUsed(const std::map<int, Node*>& graph, int pipe_id)
     return false;
 };
 
-Node* addOrGetNode(std::map<int, Node*>& graph, int value, std::map<int, CS>& cs_list)
+Node* addOrGetNode(std::unordered_map<int, Node*>& graph, int value, std::map<int, CS>& cs_list)
 {
     if (value == -1) { return nullptr; }
     if (graph.find(value) != graph.end()) {
@@ -37,7 +38,7 @@ Node* addOrGetNode(std::map<int, Node*>& graph, int value, std::map<int, CS>& cs
     return node;
 };
 
-void CreateGraph(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::map<int, Node*>& graph, std::vector<int>& selected_data)
+void CreateGraph(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph, std::vector<int>& selected_data)
 {
     Node* node = addOrGetNode(graph, selected_data[0], cs_list);
     Node* adjacentNode = addOrGetNode(graph, selected_data[1], cs_list);
@@ -47,7 +48,7 @@ void CreateGraph(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std
     adjacentNode->parents[node] = edge;
 };
 
-std::vector<int> FoundDiameter(std::map<int, Pipe>& pipe_list, std::map<int, Node*>& graph)
+std::vector<int> FoundDiameter(std::map<int, Pipe>& pipe_list, std::unordered_map<int, Node*>& graph)
 {
     std::vector<int> found_id;
 
@@ -82,6 +83,47 @@ std::vector<int> FoundDiameter(std::map<int, Pipe>& pipe_list, std::map<int, Nod
     return found_id;
 };
 
+void RemoveEdge(std::unordered_map<int, Node*>& graph, std::vector<int>& pipe_id)
+{
+    std::unordered_set<int> pipe_set(pipe_id.begin(), pipe_id.end());
+    std::unordered_set<Edge*> edges_to_delete;
+
+    for (const auto& node_pair : graph) {
+        Node* node = node_pair.second;
+
+        auto parents_it = node->parents.begin();
+        while (parents_it != node->parents.end())
+        {
+            if (parents_it->second &&
+                parents_it->second->pipe && pipe_set.count(parents_it->second->pipe->getId()))
+            {
+                parents_it = node->parents.erase(parents_it);
+            }
+            else {
+                ++parents_it;
+            };
+        };
+
+        auto edge_it = node->edges.begin();
+        while (edge_it != node->edges.end())
+        {
+            if (*edge_it &&
+                (*edge_it)->pipe && pipe_set.count((*edge_it)->pipe->getId()))
+            {
+                edges_to_delete.insert(*edge_it);
+                edge_it = node->edges.erase(edge_it);
+            }
+            else {
+                ++edge_it;
+            };
+        };
+    };
+
+    for (Edge* edge : edges_to_delete) {
+        delete edge;
+    };
+};
+
 int isCSReal(std::map<int, CS>& cs_list)
 {
     bool is_selected = true;
@@ -99,7 +141,7 @@ int isCSReal(std::map<int, CS>& cs_list)
     return cs_id;
 };
 
-void FunctionToCreateGraph(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::map<int, Node*>& graph)
+void FunctionToCreateGraph(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph)
 {
     std::vector<int> selected_data;
 
@@ -154,11 +196,33 @@ void FunctionToCreateGraph(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs
     std::cout << "\nГраф добавлен: " << "CS [ID:" << cs_start << "] ----- (Pipe [ID:" << pipe_id << "]) -----> CS [ID:" << cs_end << "]\n";
 };
 
-void GraphMenu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::map<int, Node*>& graph)
+void FunctionToRemoveEdge(std::unordered_map<int, Node*>& graph)
+{
+    bool is_selected = true;
+    int pipe_id;
+    do {
+        std::cout << "\nВведите ID трубы, которые хотите удалить из графа: ";
+        pipe_id = ProverkaNumber<int>();
+        if (isPipeUsed(graph, pipe_id)) {
+            is_selected = false;
+        }
+        else {
+            std::cout << "Труба не используется в графе!\n";
+        };
+    } while (is_selected);
+
+    std::vector<int> pipe_ids;
+    pipe_ids.push_back(pipe_id);
+    RemoveEdge(graph, pipe_ids);
+    
+    std::cout << "\nТруба [ID:" << pipe_id << "] удалена из графа\n";
+};
+
+void GraphMenu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph)
 {
     while (1) {
         std::cout << "\n--------------------------------------\n";
-        std::cout << "Выберите опцию:\n1. Добавить граф\n9. Выход\n";
+        std::cout << "Выберите опцию:\n1. Добавить граф\n2. Удалить трубу из графа\n9. Выход\n";
         std::cout << "--------------------------------------\n\n";
         int option;
         option = ProverkaNumber<int>();
@@ -166,6 +230,9 @@ void GraphMenu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::
         switch (option) {
         case 1:
             FunctionToCreateGraph(pipe_list,cs_list, graph);
+            break;
+        case 2:
+            FunctionToRemoveEdge(graph);
             break;
         case 9:
             std::cout << "\nВыходим из меню графов\n\n";

@@ -400,7 +400,7 @@ void Upload(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list)
     upload.close();
 };
 
-void Menu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::map<int, Node*>& graph)
+void Menu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph)
 {
     Logger::log("Программа запущена");
 

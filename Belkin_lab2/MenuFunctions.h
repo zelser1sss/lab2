@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <unordered_map>
 #include <vector>
 #include "Pipe.h"
 #include "CS.h"
@@ -20,6 +21,6 @@ void CSMenu(std::map<int, CS>& cs_list);
 void ViewAllObjects(const std::map<int, Pipe>& pipe_list, const std::map<int, CS>& cs_list);
 void Save(const std::map<int, Pipe>& pipe_list, const std::map<int, CS>& cs_list);
 void Upload(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list);
-void Menu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::map<int, Node*>& graph);
+void Menu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph);
 
 #include "MenuFunctions.inl"

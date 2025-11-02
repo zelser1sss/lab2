@@ -3,6 +3,7 @@
 #include <limits>
 #include <clocale>
 #include <map>
+#include <unordered_map>
 #include <vector>
 #include <fstream>
 #include <sstream>
@@ -23,7 +24,7 @@ int main()
 
     map<int, Pipe> pipe_list;
     map<int, CS> cs_list;
-    map<int, Node*> graph;
+    unordered_map<int, Node*> graph;
     Menu(pipe_list, cs_list, graph);
 
     Logger::log("=== ПРОГРАММА ЗАВЕРШЕНА ===");
