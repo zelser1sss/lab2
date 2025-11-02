@@ -27,6 +27,18 @@ bool isPipeUsed(const std::unordered_map<int, Node*>& graph, int pipe_id)
     return false;
 };
 
+bool isCSUsed(const std::unordered_map<int, Node*>& graph, int cs_id)
+{
+    for (const auto& node_pair : graph)
+    {
+        Node* node = node_pair.second;
+        if (node->cs->getId() == cs_id) {
+            return true;
+        };
+    };
+    return false;
+};
+
 Node* addOrGetNode(std::unordered_map<int, Node*>& graph, int value, std::map<int, CS>& cs_list)
 {
     if (value == -1) { return nullptr; }
@@ -94,8 +106,7 @@ void RemoveEdge(std::unordered_map<int, Node*>& graph, std::vector<int>& pipe_id
         auto parents_it = node->parents.begin();
         while (parents_it != node->parents.end())
         {
-            if (parents_it->second &&
-                parents_it->second->pipe && pipe_set.count(parents_it->second->pipe->getId()))
+            if (pipe_set.count(parents_it->second->pipe->getId()))
             {
                 parents_it = node->parents.erase(parents_it);
             }
@@ -107,8 +118,7 @@ void RemoveEdge(std::unordered_map<int, Node*>& graph, std::vector<int>& pipe_id
         auto edge_it = node->edges.begin();
         while (edge_it != node->edges.end())
         {
-            if (*edge_it &&
-                (*edge_it)->pipe && pipe_set.count((*edge_it)->pipe->getId()))
+            if (pipe_set.count((*edge_it)->pipe->getId()))
             {
                 edges_to_delete.insert(*edge_it);
                 edge_it = node->edges.erase(edge_it);
@@ -122,6 +132,44 @@ void RemoveEdge(std::unordered_map<int, Node*>& graph, std::vector<int>& pipe_id
     for (Edge* edge : edges_to_delete) {
         delete edge;
     };
+};
+
+void RemoveNode(std::unordered_map<int, Node*>& graph, std::vector<int>& cs_ids)
+{
+    std::unordered_set<int> cs_set(cs_ids.begin(), cs_ids.end());
+    std::vector<int> edges_ids;
+
+    for (auto& node_pair : graph) {
+        Node* node = node_pair.second;
+
+        auto parents_id = node->parents.begin();
+        while (parents_id != node->parents.end()) {
+            if (cs_set.count(parents_id->first->cs->getId())) {
+                edges_ids.push_back(parents_id->second->pipe->getId());
+                parents_id = node->parents.erase(parents_id);
+            }
+            else {
+                ++parents_id;
+            };
+        };
+
+        if (cs_set.count(node_pair.first)) {
+            for (Edge* edge : node_pair.second->edges)
+            {
+                edges_ids.push_back(edge->pipe->getId());
+            };
+        };
+    };
+
+    RemoveEdge(graph, edges_ids);
+
+    for (int cs_id : cs_set) {
+        auto it = graph.find(cs_id);
+        if (it != graph.end()) {
+            delete it->second;  
+            graph.erase(it);    
+        }
+    }
 };
 
 int isCSReal(std::map<int, CS>& cs_list)
@@ -201,7 +249,7 @@ void FunctionToRemoveEdge(std::unordered_map<int, Node*>& graph)
     bool is_selected = true;
     int pipe_id;
     do {
-        std::cout << "\nВведите ID трубы, которые хотите удалить из графа: ";
+        std::cout << "\nВведите ID трубы, которую хотите удалить из графа: ";
         pipe_id = ProverkaNumber<int>();
         if (isPipeUsed(graph, pipe_id)) {
             is_selected = false;
@@ -218,11 +266,33 @@ void FunctionToRemoveEdge(std::unordered_map<int, Node*>& graph)
     std::cout << "\nТруба [ID:" << pipe_id << "] удалена из графа\n";
 };
 
+void FunctionToRemoveNode(std::unordered_map<int, Node*>& graph)
+{
+    bool is_selected = true;
+    int cs_id;
+    do {
+        std::cout << "\nВведите ID КС, которую хотите удалить из графа: ";
+        cs_id = ProverkaNumber<int>();
+        if (isCSUsed(graph, cs_id)) {
+            is_selected = false;
+        }
+        else {
+            std::cout << "КС не используется в графе!\n";
+        };
+    } while (is_selected);
+
+    std::vector<int> cs_ids;
+    cs_ids.push_back(cs_id);
+    RemoveNode(graph, cs_ids);
+
+    std::cout << "\nКС и инцидентные к ним трубы [ID:" << cs_id << "] удалены из графа\n";
+};
+
 void GraphMenu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph)
 {
     while (1) {
         std::cout << "\n--------------------------------------\n";
-        std::cout << "Выберите опцию:\n1. Добавить граф\n2. Удалить трубу из графа\n9. Выход\n";
+        std::cout << "Выберите опцию:\n1. Добавить граф\n2. Удалить трубу из графа\n3. Удалить КС из графа\n9. Выход\n";
         std::cout << "--------------------------------------\n\n";
         int option;
         option = ProverkaNumber<int>();
@@ -233,6 +303,9 @@ void GraphMenu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::
             break;
         case 2:
             FunctionToRemoveEdge(graph);
+            break;
+        case 3:
+            FunctionToRemoveNode(graph);
             break;
         case 9:
             std::cout << "\nВыходим из меню графов\n\n";
