@@ -241,9 +241,9 @@ void RemoveNode(std::unordered_map<int, Node*>& graph, std::vector<int>& cs_ids)
             }
             for (const auto& parent_pair : node->parents) {
                 pipes_to_remove.insert(parent_pair.second->pipe->getId());
-            }
-        }
-    }
+            };
+        };
+    };
 
     std::vector<int> edges_ids(pipes_to_remove.begin(), pipes_to_remove.end());
 
@@ -254,12 +254,11 @@ void RemoveNode(std::unordered_map<int, Node*>& graph, std::vector<int>& cs_ids)
         if (it != graph.end()) {
             delete it->second;
             graph.erase(it);
-        }
-    }
-}
+        };
+    };
+};
 
-bool hasCycleDFS(Node* node, std::unordered_set<Node*>& visited,
-    std::unordered_set<Node*>& recursionStack)
+bool hasCycleDFS(Node* node, std::unordered_set<Node*>& visited, std::unordered_set<Node*>& recursionStack)
 {
     if (recursionStack.count(node)) {
         return true;
@@ -341,6 +340,90 @@ std::vector<int> topologicalSort(std::unordered_map<int, Node*>& graph)
     };
 
     return result;
+};
+
+void initHashTables(Node* start, std::unordered_map<int, Node*>& graph, std::unordered_set<Node*>& unprocessedNodes, std::unordered_map<Node*, float>& lengthToNodes)
+{
+    for (const auto& node_pair : graph) {
+        Node* node = node_pair.second;
+        unprocessedNodes.insert(node);
+        lengthToNodes[node] = std::numeric_limits<float>::infinity();
+    };
+    lengthToNodes[start] = 0;
+};
+
+Node* getNodeWithMinLengthTolt(std::unordered_set<Node*>& unprocessedNodes, std::unordered_map<Node*, float>& lengthToNodes)
+{
+    Node* nodeWithMinLengthTolt = nullptr;
+    float minLength = std::numeric_limits<float>::infinity();
+
+    for (Node* node : unprocessedNodes) {
+        float length = lengthToNodes[node];
+        if (length < minLength) {
+            minLength = length;
+            nodeWithMinLengthTolt = node;
+        };
+    };
+    return nodeWithMinLengthTolt;
+};
+
+void calculateLengthToEachNode(std::unordered_set<Node*>& unprocessedNodes, std::unordered_map<Node*, float>& lengthToNodes)
+{
+    while (!unprocessedNodes.empty()) {
+        Node* node = getNodeWithMinLengthTolt(unprocessedNodes, lengthToNodes);
+        if (node == nullptr) {
+            auto it = unprocessedNodes.begin();
+            unprocessedNodes.erase(it);
+            continue;
+        };
+        if (lengthToNodes[node] == std::numeric_limits<float>::infinity()) return;
+        for (Edge* edge : node->edges) {
+            Node* adjacentNode = edge->adjacentNode;
+            if (unprocessedNodes.count(adjacentNode)) {
+                float lengthToCheck = lengthToNodes[node] + edge->getLength();
+                if (lengthToCheck < lengthToNodes[adjacentNode]) {
+                    lengthToNodes[adjacentNode] = lengthToCheck;
+                };
+            };
+        };
+        unprocessedNodes.erase(node);
+    };
+};
+
+std::vector<Node*> getShortestPath(Node* start, Node* end, std::unordered_map<Node*, float>& lengthToNodes)
+{
+    std::vector<Node*> path;
+    Node* node = end;
+    while (node != start) {
+        float minLengthToNode = lengthToNodes[node];
+        path.insert(path.begin(), node);
+        for (const auto& node_pair : node->parents) {
+            Node* parent = node_pair.first;
+            Edge* parentEdge = node_pair.second;
+            if (lengthToNodes.find(parent) == lengthToNodes.end()) continue;
+            bool prevNodeFound = (parentEdge->getLength() + lengthToNodes[parent]) == minLengthToNode;
+            if (prevNodeFound) {
+                lengthToNodes.erase(node);
+                node = parent;
+                break;
+            };
+        };
+    };
+    path.insert(path.begin(), node);
+    return path;
+};
+
+std::vector<Node*> getShortestPath(std::unordered_map<int, Node*>& graph, Node* start, Node* end)
+{
+    std::unordered_set<Node*> unprocessedNodes;
+    std::unordered_map<Node*, float> lengthToNodes;
+
+    initHashTables(start, graph, unprocessedNodes, lengthToNodes);
+    calculateLengthToEachNode(unprocessedNodes, lengthToNodes);
+    if (lengthToNodes[end] == std::numeric_limits<float>::infinity()) {
+        return std::vector<Node*>();
+    };
+    return getShortestPath(start, end, lengthToNodes);
 };
 
 void FunctionToCreateGraph(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph)
@@ -462,18 +545,66 @@ void DisplayGraph(const std::unordered_map<int, Node*>& graph)
 
                 if (i < node->edges.size() - 1) {
                     std::cout << ", ";
-                }
-            }
-        }
+                };
+            };
+        };
         std::cout << "\n";
-    }
-}
+    };
+};
+
+void FunctionToFindShortPath(std::unordered_map<int, Node*>& graph)
+{
+    if (graph.empty())
+    {
+        std::cout << "\nГраф пуст!";
+        return;
+    };
+
+    int start;
+    int end;
+    bool is_selected = true;
+    std::cout << "\nВведите ID КС начала пути: ";
+    do {
+        start = ProverkaNumber<int>();
+        if (isCSUsed(graph, start)) {
+            do {
+                std::cout << "Введите ID КС конец пути: ";
+                end = ProverkaNumber<int>();
+                if (isCSUsed(graph, end)) {
+                    is_selected = false;
+                }
+                else {
+                    std::cout << "КС с таким ID не используется в графе\nВведите КС, используемое в графе: ";
+                };
+            } while (is_selected);
+        }
+        else {
+            std::cout << "КС с таким ID не используется в графе\nВведите КС, используемое в графе: ";
+        };
+    } while (is_selected);
+
+    std::vector<Node*> shortPath = getShortestPath(graph, graph[start], graph[end]);
+
+    if (shortPath.empty()) {
+        std::cout << "\nНет пути между задаными КС\n";
+        return;
+    };
+
+    std::cout << "\nКратчайший путь от КС[ID:" << start << "] до КС[ID:" << end << "]:\n";
+    for (size_t i = 0; i < shortPath.size(); ++i) {
+        std::cout << "КС[ID:" << shortPath[i]->id << "]";
+        if (i < shortPath.size() - 1) {
+            std::cout << " ---> ";
+        };
+    };
+    std::cout << "\n";
+};
 
 void GraphMenu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph)
 {
     while (1) {
         std::cout << "\n--------------------------------------\n";
-        std::cout << "Выберите опцию:\n1. Добавить граф\n2. Удалить трубу из графа\n3. Удалить КС из графа\n4. Показать граф\n5. Топологическая сортировка\n9. Вернутся в главное меню\n";
+        std::cout << "Выберите опцию:\n1. Добавить граф\n2. Удалить трубу из графа\n3. Удалить КС из графа\n4. Показать граф\n5. Топологическая сортировка\n6. Найти крайтчайший путь между КС\n9. Вернутся в главное меню\n";
         std::cout << "--------------------------------------\n\n";
         int option;
         option = ProverkaNumber<int>();
@@ -493,6 +624,9 @@ void GraphMenu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::
             break;
         case 5:
             FunctionToTopologicalSort(graph);
+            break;
+        case 6:
+            FunctionToFindShortPath(graph);
             break;
         case 9:
             std::cout << "\nВыходим из меню графов\n\n";
