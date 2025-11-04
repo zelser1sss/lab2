@@ -1,4 +1,4 @@
-#include "GraphMenu.h"
+Ôªø#include "GraphMenu.h"
 #include "MenuFunctions.h"
 #include "Validation.h"
 #include "Utils.h"
@@ -62,13 +62,13 @@ int FoundDiameter(std::map<int, Pipe>& pipe_list, std::unordered_map<int, Node*>
 {
     std::vector<int> found_id;
 
-    std::cout << "\n¬˚·ÂËÚÂ ‰Ë‡ÏÂÚ ÚÛ·˚ (500 ÏÏ, 700 ÏÏ, 1000 ÏÏ, 1400 ÏÏ): ";
+    std::cout << "\n–í—ã–±–µ—Ä–∏—Ç–µ –¥–∏–∞–º–µ—Ç—Ä —Ç—Ä—É–±—ã (500 –º–º, 700 –º–º, 1000 –º–º, 1400 –º–º): ";
     int input_diameter;
     do {
         input_diameter = ProverkaNumber<int>();
         if (input_diameter != 500 && input_diameter != 700 && input_diameter != 1000 && input_diameter != 1400)
         {
-            std::cout << "¬˚·ÂËÚÂ ÍÓÂÍÚÌÓÂ ÁÌ‡˜ÂÌËÂ (500, 700, 1000 ËÎË 1400): ";
+            std::cout << "–í—ã–±–µ—Ä–∏—Ç–µ –∫–æ—Ä—Ä–µ–∫—Ç–Ω–æ–µ –∑–Ω–∞—á–µ–Ω–∏–µ (500, 700, 1000 –∏–ª–∏ 1400): ";
         };
     } while (input_diameter != 500 && input_diameter != 700 && input_diameter != 1000 && input_diameter != 1400);
 
@@ -83,15 +83,15 @@ int FoundDiameter(std::map<int, Pipe>& pipe_list, std::unordered_map<int, Node*>
     };
 
     if (found_id.empty()) {
-        std::cout << "\n“Û·˚ Ò Ú‡ÍËÏ ‰Ë‡ÏÂÚÓÏ ÌÂ Ì‡È‰ÂÌ˚!\n";
-        std::cout << "œÂÂÈ‰ÂÏ Í ÒÓÁ‰‡ÌË˛ ÚÛ·˚...\n";
+        std::cout << "\n–¢—Ä—É–±—ã —Å —Ç–∞–∫–∏–º –¥–∏–∞–º–µ—Ç—Ä–æ–º –Ω–µ –Ω–∞–π–¥–µ–Ω—ã!\n";
+        std::cout << "–ü–µ—Ä–µ–π–¥–µ–º –∫ —Å–æ–∑–¥–∞–Ω–∏—é —Ç—Ä—É–±—ã...\n";
         AddPipe(pipe_list, input_diameter);
         found_id.push_back(pipe_list.rbegin()->first);
     };
 
-    DisplayFound(pipe_list, found_id, "ÚÛ·˚");
+    DisplayFound(pipe_list, found_id, "—Ç—Ä—É–±—ã");
 
-    std::cout << "¬‚Â‰ËÚÂ ID ÚÛ·˚: ";
+    std::cout << "–í–≤–µ–¥–∏—Ç–µ ID —Ç—Ä—É–±—ã: ";
     int pipe_id;
     bool is_selected;
     do {
@@ -104,8 +104,8 @@ int FoundDiameter(std::map<int, Pipe>& pipe_list, std::unordered_map<int, Node*>
             };
         };
         if (is_selected) {
-            std::cout << "¬‚Â‰ËÚÂ ID ÚÛ·˚ ‚ ÒÔËÒÍÂ Ì‡È‰ÂÌÌ˚ı ÚÛ·: ";
-        }
+            std::cout << "–í–≤–µ–¥–∏—Ç–µ ID —Ç—Ä—É–±—ã –≤ —Å–ø–∏—Å–∫–µ –Ω–∞–π–¥–µ–Ω–Ω—ã—Ö —Ç—Ä—É–±: ";
+        };
     } while (is_selected);
 
     return pipe_id;
@@ -115,18 +115,18 @@ void FoundType(std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph
 {
 
     bool is_selected = true;
-    std::cout << "\n¬‚Â‰ËÚÂ ID  — ÓÚ ÍÓÚÓÓÈ ıÓÚËÚÂ ÔÓ‚ÂÒÚË ÚÛ·Û: ";
+    std::cout << "\n–í–≤–µ–¥–∏—Ç–µ ID –ö–° –æ—Ç –∫–æ—Ç–æ—Ä–æ–π —Ö–æ—Ç–∏—Ç–µ –ø—Ä–æ–≤–µ—Å—Ç–∏ —Ç—Ä—É–±—É: ";
     do {
         cs_start = ProverkaNumber<int>();
         if (cs_list.find(cs_start) != cs_list.end()) {
             is_selected = false;
         }
         else {
-            std::cout << " — Ò ID " << cs_start << " ÌÂ ÒÛ˘ÂÒÚ‚ÛÂÚ\n¬‚Â‰ËÚÂ ÒÛ˘ÂÒÚ‚Û˛˘ËÈ ID  —: ";
+            std::cout << "–ö–° —Å ID " << cs_start << " –Ω–µ —Å—É—â–µ—Å—Ç–≤—É–µ—Ç\n–í–≤–µ–¥–∏—Ç–µ —Å—É—â–µ—Å—Ç–≤—É—é—â–∏–π ID –ö–°: ";
         };
     } while (is_selected);
 
-    std::cout << "“ËÔ ‚˚·‡ÌÌÓÈ ÒÚ‡ÌˆËË: " << cs_list[cs_start].getType() << std::endl;
+    std::cout << "–¢–∏–ø –≤—ã–±—Ä–∞–Ω–Ω–æ–π —Å—Ç–∞–Ω—Ü–∏–∏: " << cs_list[cs_start].getType() << std::endl;
 
     std::vector<int> all_same_type;
     for (const auto& element : cs_list)
@@ -137,8 +137,8 @@ void FoundType(std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph
     };
 
     if (all_same_type.empty()) {
-        std::cout << "\n — Ò Ú‡ÍËÏ ÚËÔÓÏ ÌÂ Ì‡È‰ÂÌ˚!\n";
-        std::cout << "œÂÂÈ‰ÂÏ Í ÒÓÁ‰‡ÌË˛  —...\n";
+        std::cout << "\n–ö–° —Å —Ç–∞–∫–∏–º —Ç–∏–ø–æ–º –Ω–µ –Ω–∞–π–¥–µ–Ω—ã!\n";
+        std::cout << "–ü–µ—Ä–µ–π–¥–µ–º –∫ —Å–æ–∑–¥–∞–Ω–∏—é –ö–°...\n";
         AddCS(cs_list, cs_list[cs_start].getType());
         all_same_type.push_back(cs_list.rbegin()->first);
     };
@@ -150,28 +150,28 @@ void FoundType(std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph
 
         for (const Edge* edge : startNode->edges) {
             connected_cs.insert(edge->adjacentNode->cs->getId());
-        }
+        };
 
         for (int cs_id : all_same_type) {
             if (connected_cs.find(cs_id) == connected_cs.end()) {
                 found_id.push_back(cs_id);
-            }
-        }
+            };
+        };
     }
     else {
         found_id = all_same_type;
-    }
+    };
 
     if (found_id.empty()) {
-        std::cout << "\nÕÂÚ ‰ÓÒÚÛÔÌ˚ı  — ‰Îˇ ÒÓÂ‰ËÌÂÌËˇ!  Ó ‚ÒÂÏ  — ˝ÚÓ„Ó ÚËÔ‡ ÛÊÂ ÂÒÚ¸ ÒÓÂ‰ËÌÂÌËÂ ËÁ  — [ID:" << cs_start << "]\n";
-        std::cout << "œÂÂÈ‰ÂÏ Í ÒÓÁ‰‡ÌË˛ ÌÓ‚ÓÈ  —...\n";
+        std::cout << "\n–ù–µ—Ç –¥–æ—Å—Ç—É–ø–Ω—ã—Ö –ö–° –¥–ª—è —Å–æ–µ–¥–∏–Ω–µ–Ω–∏—è! –ö–æ –≤—Å–µ–º –ö–° —ç—Ç–æ–≥–æ —Ç–∏–ø–∞ —É–∂–µ –µ—Å—Ç—å —Å–æ–µ–¥–∏–Ω–µ–Ω–∏–µ –∏–∑ –ö–° [ID:" << cs_start << "]\n";
+        std::cout << "–ü–µ—Ä–µ–π–¥–µ–º –∫ —Å–æ–∑–¥–∞–Ω–∏—é –Ω–æ–≤–æ–π –ö–°...\n";
         AddCS(cs_list, cs_list[cs_start].getType());
         found_id.push_back(cs_list.rbegin()->first);
     };
 
-    DisplayFound(cs_list, found_id, " —");
+    DisplayFound(cs_list, found_id, "–ö–°");
 
-    std::cout << "¬‚Â‰ËÚÂ ID  — Í ÍÓÚÓÓÈ ıÓÚËÚÂ ÔÓ‚ÂÒÚË ÚÛ·Û: ";
+    std::cout << "–í–≤–µ–¥–∏—Ç–µ ID –ö–° –∫ –∫–æ—Ç–æ—Ä–æ–π —Ö–æ—Ç–∏—Ç–µ –ø—Ä–æ–≤–µ—Å—Ç–∏ —Ç—Ä—É–±—É: ";
     is_selected = true;
     do {
         is_selected = true;
@@ -183,7 +183,7 @@ void FoundType(std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph
             };
         };
         if (is_selected) {
-            std::cout << "¬‚Â‰ËÚÂ ID  — ‚ ÒÔËÒÍÂ Ì‡È‰ÂÌÌ˚ı  —: ";
+            std::cout << "–í–≤–µ–¥–∏—Ç–µ ID –ö–° –≤ —Å–ø–∏—Å–∫–µ –Ω–∞–π–¥–µ–Ω–Ω—ã—Ö –ö–°: ";
         }
     } while (is_selected);
 };
@@ -230,39 +230,117 @@ void RemoveEdge(std::unordered_map<int, Node*>& graph, std::vector<int>& pipe_id
 void RemoveNode(std::unordered_map<int, Node*>& graph, std::vector<int>& cs_ids)
 {
     std::unordered_set<int> cs_set(cs_ids.begin(), cs_ids.end());
-    std::vector<int> edges_ids;
+    std::unordered_set<int> pipes_to_remove;
 
     for (auto& node_pair : graph) {
         Node* node = node_pair.second;
 
-        auto parents_id = node->parents.begin();
-        while (parents_id != node->parents.end()) {
-            if (cs_set.count(parents_id->first->cs->getId())) {
-                edges_ids.push_back(parents_id->second->pipe->getId());
-                parents_id = node->parents.erase(parents_id);
-            }
-            else {
-                ++parents_id;
-            };
-        };
-
         if (cs_set.count(node_pair.first)) {
-            for (Edge* edge : node_pair.second->edges)
-            {
-                edges_ids.push_back(edge->pipe->getId());
-            };
-        };
-    };
+            for (Edge* edge : node->edges) {
+                pipes_to_remove.insert(edge->pipe->getId());
+            }
+            for (const auto& parent_pair : node->parents) {
+                pipes_to_remove.insert(parent_pair.second->pipe->getId());
+            }
+        }
+    }
+
+    std::vector<int> edges_ids(pipes_to_remove.begin(), pipes_to_remove.end());
 
     RemoveEdge(graph, edges_ids);
 
     for (int cs_id : cs_set) {
         auto it = graph.find(cs_id);
         if (it != graph.end()) {
-            delete it->second;  
-            graph.erase(it);    
+            delete it->second;
+            graph.erase(it);
         }
     }
+}
+
+bool hasCycleDFS(Node* node, std::unordered_set<Node*>& visited,
+    std::unordered_set<Node*>& recursionStack)
+{
+    if (recursionStack.count(node)) {
+        return true;
+    }
+
+    if (visited.count(node)) {
+        return false;
+    }
+
+    visited.insert(node);
+    recursionStack.insert(node);
+
+    for (Edge* edge : node->edges) {
+        if (hasCycleDFS(edge->adjacentNode, visited, recursionStack)) {
+            return true;
+        };
+    };
+
+    recursionStack.erase(node);
+    return false;
+}
+
+bool isAcyclicGraph(std::unordered_map<int, Node*>& graph)
+{
+
+    std::unordered_set<Node*> visited;
+    std::unordered_set<Node*> recursionStack;
+
+    for (const auto& node_pair : graph) {
+        Node* node = node_pair.second;
+
+        if (!visited.count(node)) {
+            if (hasCycleDFS(node, visited, recursionStack)) {
+                return false;
+            };
+        };
+    };
+
+    return true;
+};
+
+std::vector<int> topologicalSort(std::unordered_map<int, Node*>& graph)
+{
+    std::vector<int> result;
+
+    std::unordered_map<Node*, int> inDegree;
+    for (const auto& node_pair : graph) {
+        inDegree[node_pair.second] = 0;
+    };
+
+    for (const auto& node_pair : graph) {
+        Node* node = node_pair.second;
+        for (Edge* edge : node->edges) {
+            inDegree[edge->adjacentNode]++;
+        };
+    };
+
+    std::unordered_set<Node*> zeroInDegree;
+    for (const auto& pair : inDegree) {
+        if (pair.second == 0) {
+            zeroInDegree.insert(pair.first);
+        };
+    };
+
+    while (!zeroInDegree.empty()) {
+        auto it = zeroInDegree.begin();
+        Node* node = *it;
+        zeroInDegree.erase(it);
+
+        result.push_back(node->id);
+
+        for (Edge* edge : node->edges) {
+            Node* adjacent = edge->adjacentNode;
+            inDegree[adjacent]--;
+            if (inDegree[adjacent] == 0) {
+                zeroInDegree.insert(adjacent);
+            };
+        };
+    };
+
+    return result;
 };
 
 void FunctionToCreateGraph(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph)
@@ -271,7 +349,7 @@ void FunctionToCreateGraph(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs
 
     if (pipe_list.size() < 1 || cs_list.size() < 2)
     {
-        std::cout << "\n—ÎË¯ÍÓÏ Ï‡ÎÓ ÚÛ· Ë ÍÒ ‰Îˇ ÒÓÁ‰‡ÌËˇ „‡Ù‡\n";
+        std::cout << "\n–°–ª–∏—à–∫–æ–º –º–∞–ª–æ —Ç—Ä—É–± –∏ –∫—Å –¥–ª—è —Å–æ–∑–¥–∞–Ω–∏—è –≥—Ä–∞—Ñ–∞\n";
         return;
     };
 
@@ -288,7 +366,7 @@ void FunctionToCreateGraph(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs
 
     CreateGraph(pipe_list, cs_list, graph, selected_data);
 
-    std::cout << "\n√‡Ù ‰Ó·‡‚ÎÂÌ: " << "CS [ID:" << cs_start << "] ----- (Pipe [ID:" << pipe_id << "]) -----> CS [ID:" << cs_end << "]\n";
+    std::cout << "\n–ì—Ä–∞—Ñ –¥–æ–±–∞–≤–ª–µ–Ω: " << "CS [ID:" << cs_start << "] ----- (Pipe [ID:" << pipe_id << "]) -----> CS [ID:" << cs_end << "]\n";
 };
 
 void FunctionToRemoveEdge(std::unordered_map<int, Node*>& graph)
@@ -296,13 +374,13 @@ void FunctionToRemoveEdge(std::unordered_map<int, Node*>& graph)
     bool is_selected = true;
     int pipe_id;
     do {
-        std::cout << "\n¬‚Â‰ËÚÂ ID ÚÛ·˚, ÍÓÚÓÛ˛ ıÓÚËÚÂ Û‰‡ÎËÚ¸ ËÁ „‡Ù‡: ";
+        std::cout << "\n–í–≤–µ–¥–∏—Ç–µ ID —Ç—Ä—É–±—ã, –∫–æ—Ç–æ—Ä—É—é —Ö–æ—Ç–∏—Ç–µ —É–¥–∞–ª–∏—Ç—å –∏–∑ –≥—Ä–∞—Ñ–∞: ";
         pipe_id = ProverkaNumber<int>();
         if (isPipeUsed(graph, pipe_id)) {
             is_selected = false;
         }
         else {
-            std::cout << "“Û·‡ ÌÂ ËÒÔÓÎ¸ÁÛÂÚÒˇ ‚ „‡ÙÂ!\n";
+            std::cout << "–¢—Ä—É–±–∞ –Ω–µ –∏—Å–ø–æ–ª—å–∑—É–µ—Ç—Å—è –≤ –≥—Ä–∞—Ñ–µ!\n";
         };
     } while (is_selected);
 
@@ -310,7 +388,7 @@ void FunctionToRemoveEdge(std::unordered_map<int, Node*>& graph)
     pipe_ids.push_back(pipe_id);
     RemoveEdge(graph, pipe_ids);
     
-    std::cout << "\n“Û·‡ [ID:" << pipe_id << "] Û‰‡ÎÂÌ‡ ËÁ „‡Ù‡\n";
+    std::cout << "\n–¢—Ä—É–±–∞ [ID:" << pipe_id << "] —É–¥–∞–ª–µ–Ω–∞ –∏–∑ –≥—Ä–∞—Ñ–∞\n";
 };
 
 void FunctionToRemoveNode(std::unordered_map<int, Node*>& graph)
@@ -318,13 +396,13 @@ void FunctionToRemoveNode(std::unordered_map<int, Node*>& graph)
     bool is_selected = true;
     int cs_id;
     do {
-        std::cout << "\n¬‚Â‰ËÚÂ ID  —, ÍÓÚÓÛ˛ ıÓÚËÚÂ Û‰‡ÎËÚ¸ ËÁ „‡Ù‡: ";
+        std::cout << "\n–í–≤–µ–¥–∏—Ç–µ ID –ö–°, –∫–æ—Ç–æ—Ä—É—é —Ö–æ—Ç–∏—Ç–µ —É–¥–∞–ª–∏—Ç—å –∏–∑ –≥—Ä–∞—Ñ–∞: ";
         cs_id = ProverkaNumber<int>();
         if (isCSUsed(graph, cs_id)) {
             is_selected = false;
         }
         else {
-            std::cout << " — ÌÂ ËÒÔÓÎ¸ÁÛÂÚÒˇ ‚ „‡ÙÂ!\n";
+            std::cout << "–ö–° –Ω–µ –∏—Å–ø–æ–ª—å–∑—É–µ—Ç—Å—è –≤ –≥—Ä–∞—Ñ–µ!\n";
         };
     } while (is_selected);
 
@@ -332,14 +410,70 @@ void FunctionToRemoveNode(std::unordered_map<int, Node*>& graph)
     cs_ids.push_back(cs_id);
     RemoveNode(graph, cs_ids);
 
-    std::cout << "\n — Ë ËÌˆË‰ÂÌÚÌ˚Â Í ÌËÏ ÚÛ·˚ [ID:" << cs_id << "] Û‰‡ÎÂÌ˚ ËÁ „‡Ù‡\n";
+    std::cout << "\n–ö–° –∏ –∏–Ω—Ü–∏–¥–µ–Ω—Ç–Ω—ã–µ –∫ –Ω–∏–º —Ç—Ä—É–±—ã [ID:" << cs_id << "] —É–¥–∞–ª–µ–Ω—ã –∏–∑ –≥—Ä–∞—Ñ–∞\n";
 };
+
+void FunctionToTopologicalSort(std::unordered_map<int, Node*>& graph)
+{
+
+    if (graph.empty()) {
+        std::cout << "\n–ì—Ä–∞—Ñ –ø—É—Å—Ç!\n";
+        return;
+    };
+
+    if (!isAcyclicGraph(graph)) {
+        std::cout << "\n–û—à–∏–±–∫–∞: –ì—Ä–∞—Ñ —Å–æ–¥–µ—Ä–∂–∏—Ç —Ü–∏–∫–ª—ã, —Ç–æ–ø–æ–ª–æ–≥–∏—á–µ—Å–∫–∞—è —Å–æ—Ä—Ç–∏—Ä–æ–≤–∫–∞ –Ω–µ–≤–æ–∑–º–æ–∂–Ω–∞!\n";
+        return;
+    };
+
+    std::vector<int> sorted = topologicalSort(graph);
+
+    std::cout << "\n–¢–æ–ø–æ–ª–æ–≥–∏—á–µ—Å–∫–∞—è —Å–æ—Ä—Ç–∏—Ä–æ–≤–∫–∞:\n";
+    for (size_t i = 0; i < sorted.size(); ++i) {
+        std::cout << i+1 << ". –ö–°[ID:" << sorted[i] << "]\n";
+    };
+};
+
+void DisplayGraph(const std::unordered_map<int, Node*>& graph)
+{
+    if (graph.empty()) {
+        std::cout << "\n–ì—Ä–∞—Ñ –ø—É—Å—Ç!\n";
+        return;
+    }
+
+    std::cout << "\n--------------------------------------\n";
+    std::cout << "         –°–¢–†–£–ö–¢–£–†–ê –ì–†–ê–§–ê\n";
+    std::cout << "--------------------------------------\n";
+
+    for (const auto& node_pair : graph) {
+        Node* node = node_pair.second;
+
+        std::cout << "–ö–°[ID:" << node->id << "]";
+
+        if (node->edges.empty()) {
+            std::cout << " ---> (–Ω–µ—Ç –∏—Å—Ö–æ–¥—è—â–∏—Ö —Ç—Ä—É–±)";
+        }
+        else {
+            std::cout << " ---> ";
+            for (size_t i = 0; i < node->edges.size(); ++i) {
+                const Edge* edge = node->edges[i];
+                std::cout << "–ö–°[ID:" << edge->adjacentNode->id << "]";
+                std::cout << "(–¢—Ä—É–±–∞[ID:" << edge->pipe->getId() << "])";
+
+                if (i < node->edges.size() - 1) {
+                    std::cout << ", ";
+                }
+            }
+        }
+        std::cout << "\n";
+    }
+}
 
 void GraphMenu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph)
 {
     while (1) {
         std::cout << "\n--------------------------------------\n";
-        std::cout << "¬˚·ÂËÚÂ ÓÔˆË˛:\n1. ƒÓ·‡‚ËÚ¸ „‡Ù\n2. ”‰‡ÎËÚ¸ ÚÛ·Û ËÁ „‡Ù‡\n3. ”‰‡ÎËÚ¸  — ËÁ „‡Ù‡\n9. ¬ÂÌÛÚÒˇ ‚ „Î‡‚ÌÓÂ ÏÂÌ˛\n";
+        std::cout << "–í—ã–±–µ—Ä–∏—Ç–µ –æ–ø—Ü–∏—é:\n1. –î–æ–±–∞–≤–∏—Ç—å –≥—Ä–∞—Ñ\n2. –£–¥–∞–ª–∏—Ç—å —Ç—Ä—É–±—É –∏–∑ –≥—Ä–∞—Ñ–∞\n3. –£–¥–∞–ª–∏—Ç—å –ö–° –∏–∑ –≥—Ä–∞—Ñ–∞\n4. –ü–æ–∫–∞–∑–∞—Ç—å –≥—Ä–∞—Ñ\n5. –¢–æ–ø–æ–ª–æ–≥–∏—á–µ—Å–∫–∞—è —Å–æ—Ä—Ç–∏—Ä–æ–≤–∫–∞\n9. –í–µ—Ä–Ω—É—Ç—Å—è –≤ –≥–ª–∞–≤–Ω–æ–µ –º–µ–Ω—é\n";
         std::cout << "--------------------------------------\n\n";
         int option;
         option = ProverkaNumber<int>();
@@ -354,11 +488,17 @@ void GraphMenu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::
         case 3:
             FunctionToRemoveNode(graph);
             break;
+        case 4:
+            DisplayGraph(graph);
+            break;
+        case 5:
+            FunctionToTopologicalSort(graph);
+            break;
         case 9:
-            std::cout << "\n¬˚ıÓ‰ËÏ ËÁ ÏÂÌ˛ „‡ÙÓ‚\n\n";
+            std::cout << "\n–í—ã—Ö–æ–¥–∏–º –∏–∑ –º–µ–Ω—é –≥—Ä–∞—Ñ–æ–≤\n\n";
             return;
         default:
-            std::cout << "ÕÂËÁ‚ÂÒÚÌ‡ˇ ÓÔˆËˇ. œÓÔÓ·ÛÈÚÂ Â˘Â ‡Á\n\n";
+            std::cout << "–ù–µ–∏–∑–≤–µ—Å—Ç–Ω–∞—è –æ–ø—Ü–∏—è. –ü–æ–ø—Ä–æ–±—É–π—Ç–µ –µ—â–µ —Ä–∞–∑\n\n";
             break;
         };
     };

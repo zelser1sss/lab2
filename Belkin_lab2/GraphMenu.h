@@ -1,6 +1,8 @@
 #pragma once
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
+#include <stack>
 #include <vector>
 #include <unordered_set>
 #include "Pipe.h"
@@ -15,6 +17,8 @@ int FoundDiameter(std::map<int, Pipe>& pipe_list, std::unordered_map<int, Node*>
 void FoundType(std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph, int& cs_start, int& cs_end);
 void RemoveEdge(std::unordered_map<int, Node*>& graph, std::vector<int>& pipe_id);
 void RemoveNode(std::unordered_map<int, Node*>& graph, std::vector<int>& cs_ids);
+void DFS(Node* node, std::unordered_set<Node*>& passed);
+void DFSWrap(std::unordered_map<int, Node*>& graph);
 void FunctionToCreateGraph(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph);
 void FunctionToRemoveEdge(std::unordered_map<int, Node*>& graph);
 void FunctionToRemoveNode(std::unordered_map<int, Node*>& graph);
