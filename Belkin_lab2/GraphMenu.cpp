@@ -132,7 +132,32 @@ void FoundType(std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph
     for (const auto& element : cs_list)
     {
         if (element.second.getType() == cs_list[cs_start].getType() && element.first != cs_start) {
-            all_same_type.push_back(element.first);
+            int it = element.first;
+            bool has_connection = false;
+
+            if (graph.find(cs_start) != graph.end()) {
+                Node* startNode = graph[cs_start];
+                for (const Edge* edge : startNode->getEdges()) {
+                    if (edge->getAdjacentNode()->getId() == it) {
+                        has_connection = true;
+                        break;
+                    };
+                };
+            };
+
+            if (!has_connection && graph.find(it) != graph.end()) {
+                Node* itNode = graph[it];
+                for (const Edge* edge : itNode->getEdges()) {
+                    if (edge->getAdjacentNode()->getId() == cs_start) {
+                        has_connection = true;
+                        break;
+                    };
+                };
+            };
+
+            if (!has_connection) {
+                all_same_type.push_back(it);
+            };
         };
     };
 
