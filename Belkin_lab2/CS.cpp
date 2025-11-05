@@ -7,7 +7,7 @@ CS::CS(int id, const std::string& name, int k_cex, int k_cex_in_work, const std:
 
 float CS::getUnusedPercent() const {
     if (k_cex == 0) return 0.0f;
-    return (static_cast<float>(k_cex - k_cex_in_work) / k_cex) * 100;
+    return std::round((static_cast<float>(k_cex - k_cex_in_work) / k_cex) * 100);
 };
 
 bool CS::startWorkshops(int count) {

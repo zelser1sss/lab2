@@ -9,15 +9,15 @@ bool isPipeUsed(const std::unordered_map<int, Node*>& graph, int pipe_id)
     for (const auto& node_pair : graph) {
         Node* node = node_pair.second;
 
-        for (const Edge* edge : node->edges) {
-            if (edge->pipe && edge->pipe->getId() == pipe_id) {
+        for (const Edge* edge : node->getEdges()) {
+            if (edge->getPipe()->getId() == pipe_id) {
                 return true;
             };
         };
 
-        for (const auto& parent_pair : node->parents) {
+        for (const auto& parent_pair : node->getParents()) {
             const Edge* edge = parent_pair.second;
-            if (edge->pipe && edge->pipe->getId() == pipe_id) {
+            if (edge->getPipe()->getId() == pipe_id) {
                 return true;
             };
         };
@@ -30,7 +30,7 @@ bool isCSUsed(const std::unordered_map<int, Node*>& graph, int cs_id)
     for (const auto& node_pair : graph)
     {
         Node* node = node_pair.second;
-        if (node->cs->getId() == cs_id) {
+        if (node->getCS()->getId() == cs_id) {
             return true;
         };
     };
@@ -54,8 +54,8 @@ void CreateGraph(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std
     Node* adjacentNode = addOrGetNode(graph, selected_data[1], cs_list);
 
     Edge* edge = new Edge(adjacentNode, &pipe_list.at(selected_data[2]), pipe_list[selected_data[2]].getLength());
-    node->edges.push_back(edge);
-    adjacentNode->parents[node] = edge;
+    node->getEdges().push_back(edge);
+    adjacentNode->getParents()[node] = edge;
 };
 
 int FoundDiameter(std::map<int, Pipe>& pipe_list, std::unordered_map<int, Node*>& graph)
@@ -148,8 +148,8 @@ void FoundType(std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph
         Node* startNode = graph[cs_start];
         std::unordered_set<int> connected_cs;
 
-        for (const Edge* edge : startNode->edges) {
-            connected_cs.insert(edge->adjacentNode->cs->getId());
+        for (const Edge* edge : startNode->getEdges()) {
+            connected_cs.insert(edge->getAdjacentNode()->getCS()->getId());
         };
 
         for (int cs_id : all_same_type) {
@@ -196,25 +196,25 @@ void RemoveEdge(std::unordered_map<int, Node*>& graph, std::vector<int>& pipe_id
     for (const auto& node_pair : graph) {
         Node* node = node_pair.second;
 
-        auto parents_it = node->parents.begin();
-        while (parents_it != node->parents.end())
+        auto parents_it = node->getParents().begin();
+        while (parents_it != node->getParents().end())
         {
-            if (pipe_set.count(parents_it->second->pipe->getId()))
+            if (pipe_set.count(parents_it->second->getPipe()->getId()))
             {
-                parents_it = node->parents.erase(parents_it);
+                parents_it = node->getParents().erase(parents_it);
             }
             else {
                 ++parents_it;
             };
         };
 
-        auto edge_it = node->edges.begin();
-        while (edge_it != node->edges.end())
+        auto edge_it = node->getEdges().begin();
+        while (edge_it != node->getEdges().end())
         {
-            if (pipe_set.count((*edge_it)->pipe->getId()))
+            if (pipe_set.count((*edge_it)->getPipe()->getId()))
             {
                 edges_to_delete.insert(*edge_it);
-                edge_it = node->edges.erase(edge_it);
+                edge_it = node->getEdges().erase(edge_it);
             }
             else {
                 ++edge_it;
@@ -236,11 +236,11 @@ void RemoveNode(std::unordered_map<int, Node*>& graph, std::vector<int>& cs_ids)
         Node* node = node_pair.second;
 
         if (cs_set.count(node_pair.first)) {
-            for (Edge* edge : node->edges) {
-                pipes_to_remove.insert(edge->pipe->getId());
+            for (Edge* edge : node->getEdges()) {
+                pipes_to_remove.insert(edge->getPipe()->getId());
             }
-            for (const auto& parent_pair : node->parents) {
-                pipes_to_remove.insert(parent_pair.second->pipe->getId());
+            for (const auto& parent_pair : node->getParents()) {
+                pipes_to_remove.insert(parent_pair.second->getPipe()->getId());
             };
         };
     };
@@ -271,8 +271,8 @@ bool hasCycleDFS(Node* node, std::unordered_set<Node*>& visited, std::unordered_
     visited.insert(node);
     recursionStack.insert(node);
 
-    for (Edge* edge : node->edges) {
-        if (hasCycleDFS(edge->adjacentNode, visited, recursionStack)) {
+    for (Edge* edge : node->getEdges()) {
+        if (hasCycleDFS(edge->getAdjacentNode(), visited, recursionStack)) {
             return true;
         };
     };
@@ -311,8 +311,8 @@ std::vector<int> topologicalSort(std::unordered_map<int, Node*>& graph)
 
     for (const auto& node_pair : graph) {
         Node* node = node_pair.second;
-        for (Edge* edge : node->edges) {
-            inDegree[edge->adjacentNode]++;
+        for (Edge* edge : node->getEdges()) {
+            inDegree[edge->getAdjacentNode()]++;
         };
     };
 
@@ -328,10 +328,10 @@ std::vector<int> topologicalSort(std::unordered_map<int, Node*>& graph)
         Node* node = *it;
         zeroInDegree.erase(it);
 
-        result.push_back(node->id);
+        result.push_back(node->getId());
 
-        for (Edge* edge : node->edges) {
-            Node* adjacent = edge->adjacentNode;
+        for (Edge* edge : node->getEdges()) {
+            Node* adjacent = edge->getAdjacentNode();
             inDegree[adjacent]--;
             if (inDegree[adjacent] == 0) {
                 zeroInDegree.insert(adjacent);
@@ -377,8 +377,8 @@ void calculateLengthToEachNode(std::unordered_set<Node*>& unprocessedNodes, std:
             continue;
         };
         if (lengthToNodes[node] == std::numeric_limits<float>::infinity()) return;
-        for (Edge* edge : node->edges) {
-            Node* adjacentNode = edge->adjacentNode;
+        for (Edge* edge : node->getEdges()) {
+            Node* adjacentNode = edge->getAdjacentNode();
             if (unprocessedNodes.count(adjacentNode)) {
                 float lengthToCheck = lengthToNodes[node] + edge->getLength();
                 if (lengthToCheck < lengthToNodes[adjacentNode]) {
@@ -397,7 +397,7 @@ std::vector<Node*> getShortestPath(Node* start, Node* end, std::unordered_map<No
     while (node != start) {
         float minLengthToNode = lengthToNodes[node];
         path.insert(path.begin(), node);
-        for (const auto& node_pair : node->parents) {
+        for (const auto& node_pair : node->getParents()) {
             Node* parent = node_pair.first;
             Edge* parentEdge = node_pair.second;
             if (lengthToNodes.find(parent) == lengthToNodes.end()) continue;
@@ -450,6 +450,7 @@ void FunctionToCreateGraph(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs
     CreateGraph(pipe_list, cs_list, graph, selected_data);
 
     std::cout << "\nГраф добавлен: " << "CS [ID:" << cs_start << "] ----- (Pipe [ID:" << pipe_id << "]) -----> CS [ID:" << cs_end << "]\n";
+    Logger::logAction("Создано соединение в графе: CS " + std::to_string(cs_start) + " -> CS " + std::to_string(cs_end) + " через трубу " + std::to_string(pipe_id));
 };
 
 void FunctionToRemoveEdge(std::unordered_map<int, Node*>& graph)
@@ -472,6 +473,7 @@ void FunctionToRemoveEdge(std::unordered_map<int, Node*>& graph)
     RemoveEdge(graph, pipe_ids);
     
     std::cout << "\nТруба [ID:" << pipe_id << "] удалена из графа\n";
+    Logger::logAction("Удалена труба из графа", pipe_id);
 };
 
 void FunctionToRemoveNode(std::unordered_map<int, Node*>& graph)
@@ -494,6 +496,7 @@ void FunctionToRemoveNode(std::unordered_map<int, Node*>& graph)
     RemoveNode(graph, cs_ids);
 
     std::cout << "\nКС и инцидентные к ним трубы [ID:" << cs_id << "] удалены из графа\n";
+    Logger::logAction("Удалена КС из графа", cs_id);
 };
 
 void FunctionToTopologicalSort(std::unordered_map<int, Node*>& graph)
@@ -501,11 +504,13 @@ void FunctionToTopologicalSort(std::unordered_map<int, Node*>& graph)
 
     if (graph.empty()) {
         std::cout << "\nГраф пуст!\n";
+        Logger::logError("Пустой граф");
         return;
     };
 
     if (!isAcyclicGraph(graph)) {
         std::cout << "\nОшибка: Граф содержит циклы, топологическая сортировка невозможна!\n";
+        Logger::logError("Граф циклический. Топологическая сортировка невозможна");
         return;
     };
 
@@ -515,6 +520,7 @@ void FunctionToTopologicalSort(std::unordered_map<int, Node*>& graph)
     for (size_t i = 0; i < sorted.size(); ++i) {
         std::cout << i+1 << ". КС[ID:" << sorted[i] << "]\n";
     };
+    Logger::logAction("Выполнена топологическая сортировка графа");
 };
 
 void DisplayGraph(const std::unordered_map<int, Node*>& graph)
@@ -531,32 +537,34 @@ void DisplayGraph(const std::unordered_map<int, Node*>& graph)
     for (const auto& node_pair : graph) {
         Node* node = node_pair.second;
 
-        std::cout << "КС[ID:" << node->id << "]";
+        std::cout << "КС[ID:" << node->getId() << "]";
 
-        if (node->edges.empty()) {
+        if (node->getEdges().empty()) {
             std::cout << " ---> (нет исходящих труб)";
         }
         else {
             std::cout << " ---> ";
-            for (size_t i = 0; i < node->edges.size(); ++i) {
-                const Edge* edge = node->edges[i];
-                std::cout << "КС[ID:" << edge->adjacentNode->id << "]";
-                std::cout << "(Труба[ID:" << edge->pipe->getId() << "])";
+            for (size_t i = 0; i < node->getEdges().size(); ++i) {
+                const Edge* edge = node->getEdges()[i];
+                std::cout << "КС[ID:" << edge->getAdjacentNode()->getId() << "]";
+                std::cout << "(Труба[ID:" << edge->getPipe()->getId() << "])";
 
-                if (i < node->edges.size() - 1) {
+                if (i < node->getEdges().size() - 1) {
                     std::cout << ", ";
                 };
             };
         };
         std::cout << "\n";
     };
+    Logger::log("Отображена структура графа");
 };
 
 void FunctionToFindShortPath(std::unordered_map<int, Node*>& graph)
 {
-    if (graph.empty())
+    if (graph.size() < 2)
     {
-        std::cout << "\nГраф пуст!";
+        std::cout << "\nНедостаточно КС в графе!\n";
+        Logger::logError("Недостаточно КС для поиска кратчайшего пути");
         return;
     };
 
@@ -570,11 +578,16 @@ void FunctionToFindShortPath(std::unordered_map<int, Node*>& graph)
             do {
                 std::cout << "Введите ID КС конец пути: ";
                 end = ProverkaNumber<int>();
-                if (isCSUsed(graph, end)) {
+                if (isCSUsed(graph, end) && start != end) {
                     is_selected = false;
                 }
                 else {
-                    std::cout << "КС с таким ID не используется в графе\nВведите КС, используемое в графе: ";
+                    if (start == end) {
+                        std::cout << "КС начала не может быть концом!\nВведите другое КС: ";
+                    }
+                    else {
+                        std::cout << "КС с таким ID не используется в графе\nВведите КС, используемое в графе: ";
+                    };
                 };
             } while (is_selected);
         }
@@ -587,52 +600,63 @@ void FunctionToFindShortPath(std::unordered_map<int, Node*>& graph)
 
     if (shortPath.empty()) {
         std::cout << "\nНет пути между задаными КС\n";
+        Logger::log("Поиск кратчайшего пути: путь не найден между КС " + std::to_string(start) + " и " + std::to_string(end));
         return;
     };
 
     std::cout << "\nКратчайший путь от КС[ID:" << start << "] до КС[ID:" << end << "]:\n";
     for (size_t i = 0; i < shortPath.size(); ++i) {
-        std::cout << "КС[ID:" << shortPath[i]->id << "]";
+        std::cout << "КС[ID:" << shortPath[i]->getId() << "]";
         if (i < shortPath.size() - 1) {
             std::cout << " ---> ";
         };
     };
     std::cout << "\n";
+    Logger::logAction("Найден кратчайший путь между КС " + std::to_string(start) + " и " + std::to_string(end));
 };
 
 void GraphMenu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph)
 {
+    Logger::log("Вход в меню графов");
     while (1) {
         std::cout << "\n--------------------------------------\n";
-        std::cout << "Выберите опцию:\n1. Добавить граф\n2. Удалить трубу из графа\n3. Удалить КС из графа\n4. Показать граф\n5. Топологическая сортировка\n6. Найти крайтчайший путь между КС\n9. Вернутся в главное меню\n";
+        std::cout << "Выберите опцию:\n1. Добавить соединение КС\n2. Удалить трубу из графа\n3. Удалить КС из графа\n4. Показать граф\n5. Топологическая сортировка\n6. Найти крайтчайший путь между КС\n9. Вернутся в главное меню\n";
         std::cout << "--------------------------------------\n\n";
         int option;
         option = ProverkaNumber<int>();
 
         switch (option) {
         case 1:
+            Logger::log("Выбрана опция: Добавить соединение КС");
             FunctionToCreateGraph(pipe_list,cs_list, graph);
             break;
         case 2:
+            Logger::log("Выбрана опция: Удалить трубу из графа");
             FunctionToRemoveEdge(graph);
             break;
         case 3:
+            Logger::log("Выбрана опция: Удалить КС из графа");
             FunctionToRemoveNode(graph);
             break;
         case 4:
+            Logger::log("Выбрана опция: Показать граф");
             DisplayGraph(graph);
             break;
         case 5:
+            Logger::log("Выбрана опция: Топологическая сортировка");
             FunctionToTopologicalSort(graph);
             break;
         case 6:
+            Logger::log("Выбрана опция: Найти кратчайший путь между КС");
             FunctionToFindShortPath(graph);
             break;
         case 9:
             std::cout << "\nВыходим из меню графов\n\n";
+            Logger::log("Выход из меню графов");
             return;
         default:
             std::cout << "Неизвестная опция. Попробуйте еще раз\n\n";
+            Logger::log("Выбрана неизвестная опция в меню графов: " + std::to_string(option));
             break;
         };
     };

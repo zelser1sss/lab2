@@ -272,7 +272,7 @@ void ViewAllObjects(const std::map<int, Pipe>& pipe_list, const std::map<int, CS
     };
 };
 
-void Save(const std::map<int, Pipe>& pipe_list, const std::map<int, CS>& cs_list)
+void Save(const std::map<int, Pipe>& pipe_list, const std::map<int, CS>& cs_list, const std::unordered_map<int, Node*>& graph)
 {
     std::string file;
     std::cout << "\nВведите название файла: ";
@@ -286,7 +286,9 @@ void Save(const std::map<int, Pipe>& pipe_list, const std::map<int, CS>& cs_list
         if (!(pipe_list.empty())) {
             save << "ТРУБЫ\n";
             for (const auto& element : pipe_list) {
-                save << element.second.getId() << "|" << element.second.getName() << "|" << element.second.getLength() << "|" << element.second.getDiameter() << "|" << element.second.getRepair() << "|" << std::endl;
+                save << element.second.getId() << "|" << element.second.getName() << "|"
+                    << element.second.getLength() << "|" << element.second.getDiameter()
+                    << "|" << element.second.getRepair() << "|" << std::endl;
             };
             std::cout << "\nСписок труб сохранен!\n";
             Logger::log("Сохранено " + std::to_string(pipe_list.size()) + " труб");
@@ -299,14 +301,43 @@ void Save(const std::map<int, Pipe>& pipe_list, const std::map<int, CS>& cs_list
         if (!(cs_list.empty())) {
             save << "КС\n";
             for (const auto& element : cs_list) {
-                save << element.second.getId() << "|" << element.second.getName() << "|" << element.second.getKCex() << "|" << element.second.getKCexInWork() << "|" << element.second.getType() << "|" << std::endl;
+                save << element.second.getId() << "|" << element.second.getName() << "|"
+                    << element.second.getKCex() << "|" << element.second.getKCexInWork()
+                    << "|" << element.second.getType() << "|" << std::endl;
             };
-            std::cout << "Список КС сохранен!\n\n";
+            std::cout << "Список КС сохранен!\n";
             Logger::log("Сохранено " + std::to_string(cs_list.size()) + " КС");
         }
         else {
-            save << "КС НЕТ";
-            std::cout << "КС НЕТ\n\n";
+            save << "КС НЕТ\n";
+            std::cout << "КС НЕТ\n";
+        };
+
+        if (!graph.empty()) {
+            save << "ГРАФ\n";
+
+            save << "УЗЛЫ\n";
+            for (const auto& node_pair : graph) {
+                Node* node = node_pair.second;
+                save << node->getId() << "|" << std::endl;
+            }
+
+            save << "РЕБРА\n";
+            for (const auto& node_pair : graph) {
+                Node* node = node_pair.second;
+                for (const Edge* edge : node->getEdges()) {
+                    save << node->getId() << "|"
+                        << edge->getAdjacentNode()->getId() << "|"
+                        << edge->getPipe()->getId() << "|"
+                        << edge->getWeight() << "|" << std::endl;
+                }
+            }
+            std::cout << "Структура графа сохранена!\n\n";
+            Logger::log("Сохранен граф с " + std::to_string(graph.size()) + " узлами");
+        }
+        else {
+            save << "ГРАФ ПУСТ\n";
+            std::cout << "ГРАФ ПУСТ\n\n";
         };
     }
     else {
@@ -316,7 +347,7 @@ void Save(const std::map<int, Pipe>& pipe_list, const std::map<int, CS>& cs_list
     };
 };
 
-void Upload(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list)
+void Upload(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph)
 {
     std::string file;
     std::cout << "\nВведите имя файла: ";
@@ -326,6 +357,7 @@ void Upload(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list)
 
     std::string line;
     std::string state = "None";
+    std::string graph_state = "None"; 
     std::ifstream upload(file);
 
     if (!(upload.is_open())) {
@@ -336,6 +368,14 @@ void Upload(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list)
 
     pipe_list.clear();
     cs_list.clear();
+
+    for (auto& pair : graph) {
+        for (Edge* edge : pair.second->getEdges()) {
+            delete edge;
+        }
+        delete pair.second;
+    }
+    graph.clear();
 
     int maxPipeId = 0;
     int maxCsId = 0;
@@ -352,41 +392,115 @@ void Upload(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list)
         else if ("ТРУБЫ" == line) {
             state = "Trubs";
             continue;
-        };
-
-        if ("КС НЕТ" == line) {
+        }
+        else if ("КС НЕТ" == line) {
             std::cout << "КС НЕТ\n";
             continue;
         }
         else if ("КС" == line) {
             state = "CS";
             continue;
-        };
-
-        std::vector<size_t> pos = { 0 };
-        for (size_t i = 0; i < 5; i++) {
-            size_t found_pos = line.find('|', pos[i]);
-            pos.push_back(found_pos + 1);
-        };
-
-        std::vector<std::string> sub;
-        for (size_t i = 0; i < (pos.size() - 1); i++) {
-            std::string found_sub = line.substr(pos[i], pos[i + 1] - pos[i] - 1);
-            sub.push_back(found_sub);
+        }
+        else if ("ГРАФ ПУСТ" == line) {
+            std::cout << "ГРАФ ПУСТ\n";
+            continue;
+        }
+        else if ("ГРАФ" == line) {
+            state = "Graph";
+            graph_state = "None";
+            continue;
+        }
+        else if ("УЗЛЫ" == line && state == "Graph") {
+            graph_state = "Nodes";
+            continue;
+        }
+        else if ("РЕБРА" == line && state == "Graph") {
+            graph_state = "Edges";
+            continue;
         };
 
         if (state == "Trubs") {
-            int ID = stoi(sub[0]);
-            Pipe newPipe(ID, sub[1], stof(sub[2]), stoi(sub[3]), stoi(sub[4]));
-            pipe_list.emplace(ID, newPipe);
-            if (ID > maxPipeId) maxPipeId = ID;
-        };
+            std::vector<std::string> sub;
+            size_t start = 0;
+            size_t end = line.find('|');
 
-        if (state == "CS") {
-            int ID = stoi(sub[0]);
-            CS newCS(ID, sub[1], stoi(sub[2]), stoi(sub[3]), sub[4]);
-            cs_list.emplace(ID, newCS);
-            if (ID > maxCsId) maxCsId = ID;
+            while (end != std::string::npos) {
+                sub.push_back(line.substr(start, end - start));
+                start = end + 1;
+                end = line.find('|', start);
+            };
+
+            if (sub.size() >= 5) {
+                int ID = stoi(sub[0]);
+                Pipe newPipe(ID, sub[1], stof(sub[2]), stoi(sub[3]), stoi(sub[4]));
+                pipe_list.emplace(ID, newPipe);
+                if (ID > maxPipeId) maxPipeId = ID;
+            };
+        }
+        else if (state == "CS") {
+            std::vector<std::string> sub;
+            size_t start = 0;
+            size_t end = line.find('|');
+
+            while (end != std::string::npos) {
+                sub.push_back(line.substr(start, end - start));
+                start = end + 1;
+                end = line.find('|', start);
+            };
+
+            if (sub.size() >= 5) {
+                int ID = stoi(sub[0]);
+                CS newCS(ID, sub[1], stoi(sub[2]), stoi(sub[3]), sub[4]);
+                cs_list.emplace(ID, newCS);
+                if (ID > maxCsId) maxCsId = ID;
+            };
+        }
+        else if (state == "Graph") {
+            if (graph_state == "Nodes") {
+                std::vector<std::string> sub;
+                size_t start = 0;
+                size_t end = line.find('|');
+
+                while (end != std::string::npos) {
+                    sub.push_back(line.substr(start, end - start));
+                    start = end + 1;
+                    end = line.find('|', start);
+                };
+
+                if (sub.size() >= 1) {
+                    int cs_id = stoi(sub[0]);
+                    if (cs_list.find(cs_id) != cs_list.end()) {
+                        Node* node = new Node(cs_id, &cs_list.at(cs_id));
+                        graph[cs_id] = node;
+                    };
+                };
+            }
+            else if (graph_state == "Edges") {
+                std::vector<std::string> sub;
+                size_t start = 0;
+                size_t end = line.find('|');
+
+                while (end != std::string::npos) {
+                    sub.push_back(line.substr(start, end - start));
+                    start = end + 1;
+                    end = line.find('|', start);
+                };
+
+                if (sub.size() >= 4) {
+                    int start_cs_id = stoi(sub[0]);
+                    int end_cs_id = stoi(sub[1]);
+                    int pipe_id = stoi(sub[2]);
+                    float length = stof(sub[3]);
+
+                    if (cs_list.find(start_cs_id) != cs_list.end() &&
+                        cs_list.find(end_cs_id) != cs_list.end() &&
+                        pipe_list.find(pipe_id) != pipe_list.end()) {
+
+                        std::vector<int> selected_data = { start_cs_id, end_cs_id, pipe_id };
+                        CreateGraph(pipe_list, cs_list, graph, selected_data);
+                    };
+                };
+            };
         };
     };
 
@@ -397,7 +511,9 @@ void Upload(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list)
         IdManager::Update(cs_list, "cs");
     };
 
-    Logger::log("Загружено " + std::to_string(pipe_list.size()) + " труб и " + std::to_string(cs_list.size()) + " КС");
+    Logger::log("Загружено " + std::to_string(pipe_list.size()) + " труб, " +
+        std::to_string(cs_list.size()) + " КС и граф с " +
+        std::to_string(graph.size()) + " узлами");
     std::cout << std::endl;
     upload.close();
 };
@@ -431,10 +547,10 @@ void Menu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unord
             GraphMenu(pipe_list, cs_list, graph);
             break;
         case 5:
-            Save(pipe_list, cs_list);
+            Save(pipe_list, cs_list, graph);
             break;
         case 6:
-            Upload(pipe_list, cs_list);
+            Upload(pipe_list, cs_list, graph);
             break;
         case 9:
             std::cout << "\nВыходим...\n";

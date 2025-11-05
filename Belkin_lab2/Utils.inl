@@ -51,7 +51,7 @@ void DisplayFound(const std::map<int, T>& container, const std::vector<int>& fou
     if constexpr (std::is_same_v<T, Pipe>) {
         for (int i : found_id) {
             const Pipe& pipe = container.find(i)->second;
-            std::cout << pipe.getName() << " [ID:" << pipe.getId() << "] Диаметр(мм): " << pipe.getDiameter() << " | Статус в ремонте : ";
+            std::cout << pipe.getName() << " [ID:" << pipe.getId() << "] Длина(км): " << pipe.getLength() << " | Диаметр(мм) : " << pipe.getDiameter() << " | Статус в ремонте : ";
             if (pipe.getRepair() == true) {
                 std::cout << "ДА" << std::endl;
             }

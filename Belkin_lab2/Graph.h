@@ -10,37 +10,36 @@ class Edge;
 
 class Node
 {
-public:
+private:
 	int id;
 	CS* cs;
 	std::vector<Edge*> edges;
 	std::map<Node*, Edge*> parents;
 
-	Node(int nodeId, CS* compressorStation)
-		: id(nodeId), cs(compressorStation) {
-	}
+public:
+
+	Node(int nodeId, CS* compressorStation);
+
+	int getId() const { return id; };
+	CS* getCS() const { return cs; };
+	std::vector<Edge*>& getEdges() { return edges; }
+	std::map<Node*, Edge*>& getParents() { return parents; }
 };
 
 class Edge
 {
 private:
 	float length;
-
-public:
 	Pipe* pipe;
 	Node* adjacentNode;
 
-	Edge(Node* node, Pipe* p, float w)
-		: adjacentNode(node), pipe(p), length(w) {
-	}
-	float getLength()
-	{
-		if (pipe->getRepair()) {
-			return std::numeric_limits<float>::infinity();
-		}
-		else {
-			return length;
-		};
-	};
+public:
+
+	Edge(Node* node, Pipe* p, float w);
+
+	Pipe* getPipe() const { return pipe; };
+	Node* getAdjacentNode() const { return adjacentNode; };
+	float getLength();
+	float getWeight() const { return length; };
 };
 

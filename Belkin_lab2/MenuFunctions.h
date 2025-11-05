@@ -19,8 +19,8 @@ void PacketEdit(std::map<int, T>& container, std::vector<int>& found_id, std::st
 void PipeMenu(std::map<int, Pipe>& pipe_list, std::unordered_map<int, Node*>& graph);
 void CSMenu(std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph);
 void ViewAllObjects(const std::map<int, Pipe>& pipe_list, const std::map<int, CS>& cs_list);
-void Save(const std::map<int, Pipe>& pipe_list, const std::map<int, CS>& cs_list);
-void Upload(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list);
+void Save(const std::map<int, Pipe>& pipe_list, const std::map<int, CS>& cs_list, const std::unordered_map<int, Node*>& graph);
+void Upload(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph);
 void Menu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph);
 
 #include "MenuFunctions.inl"
