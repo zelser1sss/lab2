@@ -15,6 +15,8 @@ private:
 	int diameter;
 	bool repair;
 
+	static const std::vector<int> allowed_diameters;
+
 public:
 
 	Pipe() = default;
@@ -29,8 +31,11 @@ public:
 	void setId(int newId) { id = newId; }
 	void setName(const std::string& newName) { name = newName; }
 	void setLength(float newLength) { length = newLength; }
-	void setDiameter(int newDiameter) { diameter = newDiameter; }
+	bool setDiameter(int newDiameter);
 	void setRepair(bool newRepair) { repair = newRepair; }
+
+	static bool isValidDiameter(int diameter);
+	static const std::vector<int>& getAllowedDiameters();
 
 	friend std::ostream& operator<<(std::ostream& out, const Pipe& pipe);
 	friend std::istream& operator>>(std::istream& in, Pipe& pipe);

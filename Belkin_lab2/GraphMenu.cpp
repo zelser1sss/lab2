@@ -62,15 +62,15 @@ int FoundDiameter(std::map<int, Pipe>& pipe_list, std::unordered_map<int, Node*>
 {
     std::vector<int> found_id;
 
-    std::cout << "\nВыберите диаметр трубы (500 мм, 700 мм, 1000 мм, 1400 мм): ";
+    std::cout << "\nВыберите диаметр трубы (530 мм, 720 мм, 1020 мм, 1220 мм, 1420 мм): ";
     int input_diameter;
     do {
         input_diameter = ProverkaNumber<int>();
-        if (input_diameter != 500 && input_diameter != 700 && input_diameter != 1000 && input_diameter != 1400)
+        if (input_diameter != 530 && input_diameter != 720 && input_diameter != 1020 && input_diameter != 1220 && input_diameter != 1420)
         {
-            std::cout << "Выберите корректное значение (500, 700, 1000 или 1400): ";
+            std::cout << "Выберите корректное значение (530, 720, 1020, 1220 или 1420): ";
         };
-    } while (input_diameter != 500 && input_diameter != 700 && input_diameter != 1000 && input_diameter != 1400);
+    } while (input_diameter != 530 && input_diameter != 720 && input_diameter != 1020 && input_diameter != 1220 && input_diameter != 1420);
 
     bool is_used;
     for (const auto& element : pipe_list)
@@ -451,6 +451,74 @@ std::vector<Node*> getShortestPath(std::unordered_map<int, Node*>& graph, Node* 
     return getShortestPath(start, end, lengthToNodes);
 };
 
+bool dfs(std::unordered_map<int, Node*>& graph, int src, int dst,
+    std::list<Edge*>& path, std::unordered_set<int>& visited)
+{
+    if (src == dst) {
+        return true;
+    }
+
+    if (visited.count(src)) {
+        return false;
+    }
+
+    visited.insert(src);
+
+    auto& adjacent = graph[src]->getEdges();
+    for (auto edge : adjacent) {
+        if (edge->residual_flow() <= 0) {
+            continue;
+        }
+
+        if (dfs(graph, edge->getAdjacentNode()->getId(), dst, path, visited)) {
+            path.push_front(edge);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+int find_min_flow(const std::list<Edge*>& path)
+{
+    int min_flow = std::numeric_limits<int>::max();
+    for (auto edge : path) {
+        min_flow = std::min(min_flow, edge->residual_flow());
+    };
+    return min_flow;
+};
+
+int ford_fulkerson(std::unordered_map<int, Node*>& graph, int src, int dst)
+{
+    int max_flow = 0;
+
+    // Инициализируем все потоки нулями
+    for (auto& node_pair : graph) {
+        for (auto edge : node_pair.second->getEdges()) {
+            edge->setFlow(0);
+        }
+    }
+
+    while (true) {
+        std::list<Edge*> path;
+        std::unordered_set<int> visited;
+
+        if (!dfs(graph, src, dst, path, visited)) {
+            break;
+        }
+
+        int min_flow = find_min_flow(path);
+
+        for (auto edge : path) {
+            edge->setFlow(edge->getFlow() + min_flow);
+        }
+
+        max_flow += min_flow;
+    }
+
+    return max_flow;
+}
+
 void FunctionToCreateGraph(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph)
 {
     std::vector<int> selected_data;
@@ -640,12 +708,55 @@ void FunctionToFindShortPath(std::unordered_map<int, Node*>& graph)
     Logger::logAction("Найден кратчайший путь между КС " + std::to_string(start) + " и " + std::to_string(end));
 };
 
+void FunctionToFindMaxFlow(std::unordered_map<int, Node*>& graph)
+{
+    if (graph.size() < 2) {
+        std::cout << "\nНедостаточно КС в графе!\n";
+        Logger::logError("Недостаточно КС для поиска максимального потока");
+        return;
+    }
+
+    int source_id, sink_id;
+    bool is_selected = true;
+
+    std::cout << "\nВведите ID КС-источника: ";
+    do {
+        source_id = ProverkaNumber<int>();
+        if (isCSUsed(graph, source_id)) {
+            do {
+                std::cout << "Введите ID КС-стока: ";
+                sink_id = ProverkaNumber<int>();
+                if (isCSUsed(graph, sink_id) && source_id != sink_id) {
+                    is_selected = false;
+                }
+                else {
+                    if (source_id == sink_id) {
+                        std::cout << "Источник не может быть стоком!\nВведите другой ID: ";
+                    }
+                    else {
+                        std::cout << "КС с таким ID не используется в графе\nВведите существующий ID: ";
+                    }
+                }
+            } while (is_selected);
+        }
+        else {
+            std::cout << "КС с таким ID не используется в графе\nВведите существующий ID: ";
+        }
+    } while (is_selected);
+
+    int maxFlow = ford_fulkerson(graph, source_id, sink_id);
+
+    std::cout << "\nМаксимальный поток от КС[ID:" << source_id << "] до КС[ID:" << sink_id << "]: " << maxFlow << "\n";
+    Logger::logAction("Найден максимальный поток: " + std::to_string(maxFlow) +
+        " между КС " + std::to_string(source_id) + " и " + std::to_string(sink_id));
+};
+
 void GraphMenu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::unordered_map<int, Node*>& graph)
 {
     Logger::log("Вход в меню графов");
     while (1) {
         std::cout << "\n--------------------------------------\n";
-        std::cout << "Выберите опцию:\n1. Добавить соединение КС\n2. Удалить трубу из графа\n3. Удалить КС из графа\n4. Показать граф\n5. Топологическая сортировка\n6. Найти крайтчайший путь между КС\n9. Вернутся в главное меню\n";
+        std::cout << "Выберите опцию:\n1. Добавить соединение КС\n2. Удалить трубу из графа\n3. Удалить КС из графа\n4. Показать граф\n5. Топологическая сортировка\n6. Найти крайтчайший путь между КС\n7. Найти максимальный поток\n9. Вернутся в главное меню\n";
         std::cout << "--------------------------------------\n\n";
         int option;
         option = ProverkaNumber<int>();
@@ -674,6 +785,10 @@ void GraphMenu(std::map<int, Pipe>& pipe_list, std::map<int, CS>& cs_list, std::
         case 6:
             Logger::log("Выбрана опция: Найти кратчайший путь между КС");
             FunctionToFindShortPath(graph);
+            break;
+        case 7:
+            Logger::log("Выбрана опция: Найти максимальный поток");
+            FunctionToFindMaxFlow(graph);
             break;
         case 9:
             std::cout << "\nВыходим из меню графов\n\n";

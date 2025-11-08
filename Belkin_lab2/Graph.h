@@ -32,6 +32,7 @@ private:
 	float length;
 	Pipe* pipe;
 	Node* adjacentNode;
+	int flow;
 
 public:
 
@@ -41,5 +42,12 @@ public:
 	Node* getAdjacentNode() const { return adjacentNode; };
 	float getLength();
 	float getWeight() const { return length; };
+	int getCapacity();
+	int residual_flow() {
+		return getCapacity() - flow;
+	};
+	int getFlow() { return flow; };
+	void setFlow(int newFlow) { flow = newFlow; };
+	friend int ford_fulkerson(std::map<int, Node*>& graph, int src, int dst);
 };
 

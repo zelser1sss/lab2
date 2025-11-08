@@ -17,3 +17,15 @@ float Edge::getLength()
 		return length;
 	};
 };
+
+int Edge::getCapacity()
+{
+	if (pipe->getRepair()) {
+		return 0;
+	}
+	else {
+		std::map<int, int> pipePerfomance = { {530, 5}, {720, 15}, {1020, 30}, {1220, 60}, {1420, 90} };
+		return pipePerfomance[pipe->getDiameter()];
+	};
+
+};
