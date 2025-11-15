@@ -2,10 +2,13 @@
 #define UTILS_INL
 
 #include "IdManager.h"
+#include "Validation.h"
 #include <map>
 #include <vector>
 #include <unordered_map>
-#include "Graph.h"
+
+void RemoveEdge(std::unordered_map<int, Node*>& graph, std::vector<int>& pipe_id);
+void RemoveNode(std::unordered_map<int, Node*>& graph, std::vector<int>& cs_ids);
 
 template<typename T>
 int GetNextID(const std::map<int, T>& container)

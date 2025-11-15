@@ -23,4 +23,10 @@ void DisplayFound(const std::map<int, T>& container, const std::vector<int>& fou
 template <typename T>
 std::vector<int> FoundName(std::map<int, T>& container, std::string nameClass);
 
+template <typename T>
+int isReal(std::map<int, T>& container, std::string name);
+
+template <typename T>
+int FoundObject(std::map<int, T>& container, std::unordered_map<int, Node*>& graph, int input, std::string name);
+
 #include "Utils.inl"

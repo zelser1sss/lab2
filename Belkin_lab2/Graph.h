@@ -2,6 +2,7 @@
 #include <limits>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include "CS.h"
 #include "Pipe.h"
 
@@ -48,6 +49,5 @@ public:
 	};
 	int getFlow() { return flow; };
 	void setFlow(int newFlow) { flow = newFlow; };
-	friend int ford_fulkerson(std::map<int, Node*>& graph, int src, int dst);
 };
 

@@ -126,7 +126,9 @@
     <ClCompile Include="Belkin_lab2.cpp" />
     <ClCompile Include="CS.cpp" />
     <ClCompile Include="Graph.cpp" />
+    <ClCompile Include="GraphAlgorithms.cpp" />
     <ClCompile Include="GraphMenu.cpp" />
+    <ClCompile Include="GraphOperations.cpp" />
     <ClCompile Include="IdManager.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="MenuFunctions.cpp" />
@@ -137,7 +139,9 @@
   <ItemGroup>
     <ClInclude Include="CS.h" />
     <ClInclude Include="Graph.h" />
+    <ClInclude Include="GraphAlgorithms.h" />
     <ClInclude Include="GraphMenu.h" />
+    <ClInclude Include="GraphOperations.h" />
     <ClInclude Include="IdManager.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="MenuFunctions.h" />
@@ -146,6 +150,7 @@
     <ClInclude Include="Validation.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="GraphOperations.inl" />
     <None Include="MenuFunctions.inl" />
     <None Include="Utils.inl" />
   </ItemGroup>

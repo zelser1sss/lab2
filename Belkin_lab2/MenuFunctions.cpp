@@ -2,6 +2,7 @@
 #include "Logger.h"
 #include "Graph.h"
 #include "GraphMenu.h"
+#include "GraphOperations.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>

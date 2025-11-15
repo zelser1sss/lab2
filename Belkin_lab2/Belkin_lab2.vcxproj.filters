@@ -51,6 +51,12 @@
     <ClCompile Include="GraphMenu.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="GraphAlgorithms.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphOperations.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Pipe.h">
@@ -80,12 +86,21 @@
     <ClInclude Include="GraphMenu.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="GraphAlgorithms.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphOperations.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Utils.inl">
       <Filter>Файлы заголовков</Filter>
     </None>
     <None Include="MenuFunctions.inl">
+      <Filter>Файлы заголовков</Filter>
+    </None>
+    <None Include="GraphOperations.inl">
       <Filter>Файлы заголовков</Filter>
     </None>
   </ItemGroup>
